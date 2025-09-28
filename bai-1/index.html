@@ -4,13 +4,6 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Bài học: Đo Tốc độ</title>
-    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/skeleton/2.0.4/skeleton.min.css">
-    <style>
-        .chat-window { height: 300px; border: 1px solid #ccc; padding: 10px; overflow-y: auto; margin-bottom: 10px; }
-        .chat-message { margin-bottom: 10px; }
-        .user-message { text-align: right; }
-        .ai-message { background-color: #f1f1f1; padding: 8px; border-radius: 5px; }
-    </style>
     
     <script src="https://cdn.jsdelivr.net/npm/marked/marked.min.js"></script>
     
@@ -19,22 +12,180 @@
     </script>
 
     <script src="../shared/chatbot.js"></script>
+    
+    <style>
+        :root {
+            --primary-color: #0056b3;
+            --secondary-color: #ff8c00;
+            --bg-color: #f4f7fc;
+            --card-bg-color: #ffffff;
+            --text-color: #333333;
+        }
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif;
+            line-height: 1.6;
+            background-color: var(--bg-color);
+            color: var(--text-color);
+            margin: 0;
+        }
+        .container {
+            max-width: 900px;
+            margin: 0 auto;
+            padding: 20px;
+        }
+        header {
+            background-color: var(--primary-color);
+            color: white;
+            padding: 1rem 0;
+            text-align: center;
+            margin-bottom: 30px;
+        }
+        .card {
+            background-color: var(--card-bg-color);
+            border-radius: 8px;
+            box-shadow: 0 4px 8px rgba(0,0,0,0.1);
+            padding: 25px;
+            margin-bottom: 25px;
+        }
+        h1, h2, h3 {
+            color: var(--primary-color);
+        }
+        h2 {
+            border-bottom: 2px solid var(--secondary-color);
+            padding-bottom: 10px;
+            margin-top: 0;
+        }
+        button, input[type="submit"] {
+            background-color: var(--secondary-color);
+            color: white;
+            border: none;
+            padding: 10px 20px;
+            font-size: 1em;
+            border-radius: 5px;
+            cursor: pointer;
+            transition: background-color 0.3s;
+        }
+        button:hover, input[type="submit"]:hover {
+            background-color: #e67e00;
+        }
+        input[type="number"], input[type="text"], select {
+            width: 100%;
+            padding: 10px;
+            border-radius: 5px;
+            border: 1px solid #ccc;
+            margin-bottom: 10px;
+        }
+        .chat-window { height: 300px; border: 1px solid #ccc; padding: 10px; overflow-y: auto; margin-bottom: 10px; border-radius: 5px; }
+        .chat-message { margin-bottom: 10px; line-height: 1.4; }
+        .chat-message p { margin-bottom: 0.5em; }
+        .user-message { text-align: right; }
+        .ai-message { background-color: #f1f1f1; padding: 10px; border-radius: 8px; display: inline-block; max-width: 90%; text-align: left; }
+        .chat-input-area { display: flex; gap: 10px; }
+        .chat-input-area input { flex-grow: 1; }
+        .quiz-options label { display: block; margin-bottom: 10px; }
+    </style>
 </head>
 <body>
-    <div class="container">
-        <h1>Bài học: Đo Tốc độ</h1>
-        <p>Đây là nội dung chính của bài học Đo Tốc độ...</p>
+    <header>
+        <h1>Khoa Học Tự Nhiên 7 - Kết Nối Tri Thức</h1>
+    </header>
 
-        <section id="ai-chatbot-card">
+    <div class="container">
+        <article class="card">
+            <h2>Bài học: Đo Tốc Độ</h2>
+            
+            <h3>🎯 Mục tiêu bài học</h3>
+            <ul>
+                <li>Nêu được khái niệm tốc độ và ý nghĩa của tốc độ.</li>
+                <li>Viết được công thức tính tốc độ.</li>
+                <li>Vận dụng công thức để giải các bài tập đơn giản.</li>
+            </ul>
+
+            <h3>📚 Kiến thức cần ghi nhớ</h3>
+            <p>Tốc độ cho biết mức độ nhanh hay chậm của chuyển động. Tốc độ được xác định bằng quãng đường đi được trong một đơn vị thời gian.</p>
+            <p><strong>Công thức:</strong> v = s / t</p>
+            <ul>
+                <li><b>v:</b> là tốc độ</li>
+                <li><b>s:</b> là quãng đường đi được</li>
+                <li><b>t:</b> là thời gian đi hết quãng đường đó</li>
+            </ul>
+            <p><strong>Đơn vị:</strong> Đơn vị hợp pháp trong hệ SI là mét trên giây (m/s). Ngoài ra còn có kilômét trên giờ (km/h).</p>
+        </article>
+        
+        <section id="ai-chatbot-card" class="card">
             <h3>Trợ lý AI</h3>
+            <p>Đặt câu hỏi về nội dung bài học "Đo tốc độ" để được giải đáp nhé!</p>
             <div id="chat-window" class="chat-window">
-                <div class="chat-message ai-message">Chào bạn! Hãy đặt câu hỏi về bài học "Đo tốc độ" nhé.</div>
+                <div class="chat-message ai-message">Chào bạn! Tôi có thể giúp gì cho bạn về bài học này?</div>
             </div>
-            <div class="chat-input-area" style="display: flex;">
-                <input type="text" id="user-input" placeholder="Đặt câu hỏi..." style="flex-grow: 1;">
-                <button id="send-button" class="button-primary">Gửi</button>
+            <div class="chat-input-area">
+                <input type="text" id="user-input" placeholder="Ví dụ: Tốc độ là gì?" style="flex-grow: 1;">
+                <button id="send-button">Gửi</button>
             </div>
         </section>
+
+        <section class="card">
+            <h3>🛠️ Bài tập vận dụng: Máy tính tốc độ</h3>
+            <div class="form-group">
+                <label for="distance">Quãng đường (s)</label>
+                <input type="number" id="distance" placeholder="Ví dụ: 100">
+            </div>
+            <div class="form-group">
+                <label for="time">Thời gian (t)</label>
+                <input type="number" id="time" placeholder="Ví dụ: 10">
+            </div>
+            <button onclick="calculateSpeed()">Tính tốc độ (m/s)</button>
+            <div id="speedResult" style="margin-top: 15px; font-weight: bold;"></div>
+        </section>
+
+        <section class="card">
+            <h3>🧠 Mini Quiz: Kiểm tra nhanh</h3>
+            <form id="quizForm">
+                <div class="quiz-question">
+                    <p><strong>Câu 1:</strong> Công thức tính tốc độ là gì?</p>
+                    <div class="quiz-options">
+                        <label><input type="radio" name="q1" value="a"> v = s * t</label>
+                        <label><input type="radio" name="q1" value="b"> v = s / t</label>
+                        <label><input type="radio" name="q1" value="c"> v = t / s</label>
+                    </div>
+                </div>
+                <input type="submit" value="Nộp bài">
+            </form>
+            <div id="quizResult" style="margin-top: 15px; font-weight: bold;"></div>
+        </section>
+
     </div>
+
+    <script>
+        // --- Hàm cho máy tính tốc độ ---
+        function calculateSpeed() {
+            const s = parseFloat(document.getElementById('distance').value);
+            const t = parseFloat(document.getElementById('time').value);
+            const resultDiv = document.getElementById('speedResult');
+            if (isNaN(s) || isNaN(t) || t <= 0) {
+                resultDiv.textContent = "Vui lòng nhập số hợp lệ và thời gian lớn hơn 0.";
+                return;
+            }
+            const speed = s / t;
+            resultDiv.textContent = `Kết quả: Tốc độ = ${speed.toFixed(2)} m/s`;
+        }
+
+        // --- Hàm cho Mini Quiz ---
+        const quizForm = document.getElementById('quizForm');
+        quizForm.addEventListener('submit', function(event) {
+            event.preventDefault();
+            const correctAnswer = 'b';
+            const userAnswer = quizForm.elements['q1'].value;
+            const quizResultDiv = document.getElementById('quizResult');
+            if (userAnswer === correctAnswer) {
+                quizResultDiv.textContent = "Chính xác! Chúc mừng bạn.";
+                quizResultDiv.style.color = 'green';
+            } else {
+                quizResultDiv.textContent = "Chưa đúng. Vui lòng thử lại.";
+                quizResultDiv.style.color = 'red';
+            }
+        });
+    </script>
+
 </body>
 </html>
