@@ -37,7 +37,7 @@ app.post('/ask', async (req, res) => {
 
     try {
         // Chọn model đã được xác nhận hoạt động cho tài khoản của thầy/cô
-        const model = genAI.getGenerativeModel({ model: "gemini-1.5-flash" });
+        const model = genAI.getGenerativeModel({ model: "gemini-2.5-flash-image-preview" });
 
         const systemPrompt = lessonPrompts[lesson_id] || lessonPrompts['default'];
         const fullPrompt = `${systemPrompt}\n\nCâu hỏi của học sinh: "${question}"`;
@@ -58,3 +58,4 @@ app.post('/ask', async (req, res) => {
 app.listen(PORT, () => {
     console.log(`Server is running on port ${PORT}`);
 });
+
