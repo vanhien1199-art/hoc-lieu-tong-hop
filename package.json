@@ -1,0 +1,14 @@
+{
+  "name": "ai-trung-tam-service",
+  "version": "1.0.0",
+  "description": "Central AI service for learning materials",
+  "main": "askAI.js",
+  "scripts": {
+    "start": "node askAI.js"
+  },
+  "dependencies": {
+    "express": "^4.19.2",
+    "cors": "^2.8.5",
+    "@google/generative-ai": "^0.14.1"
+  }
+}

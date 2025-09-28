@@ -1,0 +1,40 @@
+<!DOCTYPE html>
+<html lang="vi">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Bài học: Đo Tốc độ</title>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/skeleton/2.0.4/skeleton.min.css">
+    <style>
+        .chat-window { height: 300px; border: 1px solid #ccc; padding: 10px; overflow-y: auto; margin-bottom: 10px; }
+        .chat-message { margin-bottom: 10px; }
+        .user-message { text-align: right; }
+        .ai-message { background-color: #f1f1f1; padding: 8px; border-radius: 5px; }
+    </style>
+    
+    <script src="https://cdn.jsdelivr.net/npm/marked/marked.min.js"></script>
+    
+    <script>
+        window.lessonId = 'do-toc-do';
+    </script>
+
+    <script src="../shared/chatbot.js"></script>
+</head>
+<body>
+    <div class="container">
+        <h1>Bài học: Đo Tốc độ</h1>
+        <p>Đây là nội dung chính của bài học Đo Tốc độ...</p>
+
+        <section id="ai-chatbot-card">
+            <h3>Trợ lý AI</h3>
+            <div id="chat-window" class="chat-window">
+                <div class="chat-message ai-message">Chào bạn! Hãy đặt câu hỏi về bài học "Đo tốc độ" nhé.</div>
+            </div>
+            <div class="chat-input-area" style="display: flex;">
+                <input type="text" id="user-input" placeholder="Đặt câu hỏi..." style="flex-grow: 1;">
+                <button id="send-button" class="button-primary">Gửi</button>
+            </div>
+        </section>
+    </div>
+</body>
+</html>
