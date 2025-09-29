@@ -76,11 +76,15 @@
                 <p><strong>Định luật bảo toàn cơ năng:</strong> Khi một vật chuyển động chỉ chịu tác dụng của trọng lực (bỏ qua ma sát), cơ năng của vật là một đại lượng không đổi.</p>
             </section>
 
-            <section id="mo-phong" class="card">
-                <h2>🔬 Mô phỏng tương tác</h2>
-                <p>Phần mô phỏng đang được xây dựng. Vui lòng quay lại sau.</p>
-                </section>
-            
+               <section id="mo-phong" class="card">
+    <h2>🔬 Mô phỏng tương tác: Công viên Năng lượng</h2>
+    <p>Hãy khám phá sự bảo toàn và chuyển hóa giữa Động năng và Thế năng qua mô phỏng "Công viên Trượt ván" nổi tiếng của PhET. Nhấn vào nút bên dưới để bắt đầu!</p>
+    
+    <a href="https://phet.colorado.edu/sims/html/energy-skate-park-basics/latest/energy-skate-park-basics_vi.html" class="button" target="_blank" rel="noopener noreferrer" style="display: inline-block; margin-top: 15px;">
+        Mở Mô phỏng trong Tab mới
+    </a>
+</section>
+              
             <section id="tro-ly-ai" class="card">
                 <h3>🤖 Trợ lý AI</h3>
                 <p>Đặt câu hỏi về Cơ năng, Động năng, Thế năng để được giải đáp nhé!</p>
@@ -95,7 +99,38 @@
 
             <section id="bai-tap" class="card">
                 <h2>✍️ Bài tập & Kiểm tra</h2>
-                <p>Phần bài tập đang được xây dựng. Vui lòng quay lại sau.</p>
+                  <form id="interactive-quiz">
+        <h4>Câu 1: Khi một vật rơi tự do (bỏ qua ma sát), đại lượng nào sau đây được bảo toàn?</h4>
+        <div class="quiz-option">
+            <label><input type="radio" name="q1" value="a"> Chỉ động năng.</label>
+        </div>
+        <div class="quiz-option">
+            <label><input type="radio" name="q1" value="b"> Chỉ thế năng.</label>
+        </div>
+        <div class="quiz-option">
+            <label><input type="radio" name="q1" value="c"> Cơ năng.</label>
+        </div>
+        <div id="feedback-q1" class="feedback"></div>
+
+        <hr>
+
+        <h4>Câu 2: Một vật khối lượng m = 1.5 kg rơi từ độ cao h = 4 m so với mặt đất. Bỏ qua ma sát, tính vận tốc (v) của vật khi chạm đất. (Lấy g = 9.8 m/s²)</h4>
+        <label for="calc-answer">Nhập câu trả lời của bạn (m/s):</label>
+        <input type="number" id="calc-answer" step="0.01">
+        <button type="button" onclick="checkCalculation()">Kiểm tra</button>
+        <div id="feedback-q2" class="feedback"></div>
+        <div id="solution-q2" class="solution" style="display:none;">
+            <p><strong>Hướng dẫn giải:</strong></p>
+            <p>Áp dụng định luật bảo toàn cơ năng. Cơ năng tại vị trí ban đầu (độ cao h) bằng cơ năng tại mặt đất.</p>
+            <p>$$ W_{đầu} = W_{cuối} $$</p>
+            <p>$$ W_{t,max} + W_{đ,min} = W_{t,min} + W_{đ,max} $$</p>
+            <p>$$ mgh + 0 = 0 + \frac{1}{2}mv^2 $$</p>
+            <p>$$ v = \sqrt{2gh} = \sqrt{2 \cdot 9.8 \cdot 4} \approx 8.85 \, m/s $$</p>
+        </div>
+
+        <button type="submit" style="margin-top: 20px;">Xem kết quả tổng</button>
+    </form>
+    <div id="final-score" class="feedback" style="font-size: 1.2em;"></div>
                 </section>
         </main>
     </div>
@@ -103,3 +138,4 @@
     <script src="app.js"></script>
 </body>
 </html>
+
