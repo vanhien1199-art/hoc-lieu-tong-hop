@@ -1,0 +1,391 @@
+<!DOCTYPE html>
+<html lang="vi">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Bài 4: Công và Công suất</title>
+
+    <script src="https://cdn.jsdelivr.net/npm/marked/marked.min.js"></script>
+    
+    <script>
+        // 1. Định nghĩa mã bài học cho trang này
+        window.lessonId = 'cong-cong-suat';
+
+        // 2. Logic của Chatbot (thay vì gọi file ngoài, chúng ta nhúng trực tiếp để tạo file duy nhất)
+        document.addEventListener('DOMContentLoaded', () => {
+            const chatWindow = document.getElementById('chat-window');
+            const userInput = document.getElementById('user-input');
+            const sendButton = document.getElementById('send-button');
+
+            // URL của Web Service trung tâm (thầy/cô có thể giữ nguyên nếu đã triển khai)
+            const AI_SERVICE_URL = 'https://ai-trung-tam-service.onrender.com';
+            const LESSON_ID = window.lessonId || 'default';
+
+            if(sendButton){
+                sendButton.addEventListener('click', askAI);
+                userInput.addEventListener('keydown', (e) => {
+                    if (e.key === 'Enter') {
+                        askAI();
+                    }
+                });
+            }
+
+            function addMessageToChat(text, className) {
+                const messageElement = document.createElement('div');
+                messageElement.classList.add('chat-message', className);
+                chatWindow.appendChild(messageElement);
+                messageElement.innerHTML = marked.parse(text);
+                chatWindow.scrollTop = chatWindow.scrollHeight;
+                return messageElement;
+            }
+
+            async function askAI() {
+                const question = userInput.value.trim();
+                if (!question) return;
+                addMessageToChat(question, 'user-message');
+                userInput.value = '';
+                const waitingMessage = addMessageToChat('Trợ lý AI đang suy nghĩ...', 'ai-message');
+
+                try {
+                    const response = await fetch(`${AI_SERVICE_URL}/ask`, {
+                        method: 'POST',
+                        headers: { 'Content-Type': 'application/json' },
+                        body: JSON.stringify({ question: question, lesson_id: LESSON_ID })
+                    });
+                    if (!response.ok) throw new Error('Lỗi mạng hoặc server');
+                    const data = await response.json();
+                    waitingMessage.innerHTML = marked.parse(data.answer);
+                } catch (error) {
+                    waitingMessage.innerHTML = marked.parse('**Xin lỗi, đã có lỗi xảy ra!** Vui lòng thử lại sau.');
+                }
+            }
+        });
+    </script>
+
+    <style>
+        :root {
+            --primary-color: #0056b3;
+            --secondary-color: #ff8c00;
+            --bg-color: #f4f7fc;
+            --card-bg-color: #ffffff;
+            --text-color: #333;
+            --correct-color: #28a745;
+            --incorrect-color: #dc3545;
+        }
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif;
+            line-height: 1.6;
+            background-color: var(--bg-color);
+            color: var(--text-color);
+            margin: 0;
+        }
+        .container {
+            max-width: 900px;
+            margin: 0 auto;
+            padding: 20px;
+        }
+        header {
+            background-color: var(--primary-color);
+            color: white;
+            padding: 1.5rem 0;
+            text-align: center;
+            margin-bottom: 30px;
+        }
+        .card {
+            background-color: var(--card-bg-color);
+            border-radius: 8px;
+            box-shadow: 0 4px 12px rgba(0,0,0,0.1);
+            padding: 25px;
+            margin-bottom: 25px;
+        }
+        h1, h2, h3, h4 { color: var(--primary-color); }
+        h2 { border-bottom: 2px solid var(--secondary-color); padding-bottom: 10px; margin-top: 0; }
+        button { background-color: var(--secondary-color); color: white; border: none; padding: 10px 20px; font-size: 1em; border-radius: 5px; cursor: pointer; transition: background-color 0.3s; }
+        button:hover { background-color: #e67e00; }
+        input[type="number"], input[type="text"] { width: 100%; padding: 10px; border-radius: 5px; border: 1px solid #ccc; margin-bottom: 10px; box-sizing: border-box; }
+        
+        /* Hoạt động 1: Có công hay không? */
+        .work-check-container { display: grid; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); gap: 20px; }
+        .work-item { text-align: center; }
+        .work-item img { max-width: 100%; height: 120px; object-fit: cover; border: 1px solid #ddd; border-radius: 5px; }
+        .work-item-feedback { font-style: italic; margin-top: 10px; min-height: 50px; }
+        
+        /* Hoạt động 2 & 3: Máy tính */
+        .calculator-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 15px; align-items: center; }
+        #work-result, #power-result-wrapper { font-weight: bold; font-size: 1.2em; color: var(--primary-color); }
+
+        /* Hoạt động 4: Kéo thả */
+        .drag-and-drop { display: flex; justify-content: space-around; align-items: center; background-color: #f0f0f0; padding: 20px; border-radius: 8px; margin-top: 20px; }
+        .draggable-items, .drop-zones { display: flex; flex-direction: column; gap: 10px; }
+        .draggable { background-color: var(--secondary-color); color: white; padding: 10px; border-radius: 5px; cursor: grab; text-align: center; }
+        .drop-zone { background-color: white; border: 2px dashed #ccc; padding: 10px; min-width: 150px; text-align: center; }
+        .drop-zone .placeholder { color: #aaa; }
+        .dragging { opacity: 0.5; }
+
+        /* Hoạt động 5: Trắc nghiệm */
+        .quiz-option label { display: block; padding: 10px; border: 1px solid #ccc; border-radius: 5px; margin-bottom: 10px; cursor: pointer; }
+        .quiz-option label.correct { background-color: #e9f7ef; border-color: var(--correct-color); }
+        .quiz-option label.incorrect { background-color: #fce8e6; border-color: var(--incorrect-color); }
+
+        /* CSS Chatbot */
+        .chat-window { height: 300px; border: 1px solid #ccc; padding: 10px; overflow-y: auto; margin-bottom: 10px; border-radius: 5px; }
+        .chat-message { margin-bottom: 10px; line-height: 1.4; }
+        .chat-message p { margin-bottom: 0.5em; }
+        .user-message { text-align: right; }
+        .ai-message { background-color: #f1f1f1; padding: 10px; border-radius: 8px; display: inline-block; max-width: 90%; text-align: left; }
+        .chat-input-area { display: flex; gap: 10px; }
+        .chat-input-area input { flex-grow: 1; }
+    </style>
+</head>
+<body>
+    <header>
+        <h1>Bài 4: CÔNG VÀ CÔNG SUẤT</h1>
+    </header>
+
+    <div class="container">
+        <section id="phan1" class="card">
+            <h2>Phần I: Công cơ học</h2>
+            <h4>1. Lý thuyết</h4>
+            <p>Khi một lực tác dụng lên vật và làm vật dịch chuyển theo phương không vuông góc với phương của lực thì lực đó đã thực hiện một công cơ học. Công cơ học được tính bằng công thức: $$A = F \cdot s$$</p>
+            
+            <h4>2. Hoạt động 1: "Có công hay không?"</h4>
+            <div class="work-check-container">
+                <div class="work-item">
+                    <img src="https://via.placeholder.com/200x120.png?text=Đưa+vật+nặng" alt="Đưa vật nặng lên cao">
+                    <p>Đưa vật nặng lên cao theo phương thẳng đứng. Có công không?</p>
+                    <div>
+                        <button onclick="checkWork(1, true)">Có</button>
+                        <button onclick="checkWork(1, false)">Không</button>
+                    </div>
+                    <div class="work-item-feedback" id="feedback-1"></div>
+                </div>
+                <div class="work-item">
+                    <img src="https://via.placeholder.com/200x120.png?text=Ném+lao" alt="Người ném lao">
+                    <p>Lực của tay tác dụng lên quả lao khi đang bay. Có công không?</p>
+                    <div>
+                        <button onclick="checkWork(2, true)">Có</button>
+                        <button onclick="checkWork(2, false)">Không</button>
+                    </div>
+                    <div class="work-item-feedback" id="feedback-2"></div>
+                </div>
+                <div class="work-item">
+                    <img src="https://via.placeholder.com/200x120.png?text=Ngồi+học" alt="Học sinh ngồi học">
+                    <p>Học sinh ngồi yên học bài. Trọng lực của người có sinh công không?</p>
+                    <div>
+                        <button onclick="checkWork(3, true)">Có</button>
+                        <button onclick="checkWork(3, false)">Không</button>
+                    </div>
+                    <div class="work-item-feedback" id="feedback-3"></div>
+                </div>
+                <div class="work-item">
+                    <img src="https://via.placeholder.com/200x120.png?text=Đẩy+tạ" alt="Người đẩy tạ">
+                    <p>Lực sĩ giữ quả tạ đứng yên trên cao. Lực giữ của tay có sinh công không?</p>
+                    <div>
+                        <button onclick="checkWork(4, true)">Có</button>
+                        <button onclick="checkWork(4, false)">Không</button>
+                    </div>
+                    <div class="work-item-feedback" id="feedback-4"></div>
+                </div>
+            </div>
+            
+            <h4>3. Lý thuyết nâng cao</h4>
+            <p>Trong trường hợp tổng quát, khi lực F hợp với phương dịch chuyển s một góc α, công được tính bằng công thức: $$A = F \cdot s \cdot \cos(\alpha)$$. Khi lực vuông góc với phương dịch chuyển ($$\alpha = 90^\circ$$), ta có $$\cos(90^\circ) = 0$$, do đó công A = 0.</p>
+            
+            <h4>4. Hoạt động 2: "Máy tính Công cơ học"</h4>
+            <div>
+                <label for="force">Lực tác dụng F (N):</label>
+                <input type="number" id="force" value="100">
+                <label for="distance">Quãng đường s (m):</label>
+                <input type="number" id="distance" value="5">
+                <label for="angle">Góc α (độ):</label>
+                <input type="number" id="angle" value="0">
+                <button onclick="calculateWork()">Tính Công</button>
+                <p id="work-result">Kết quả: A = ? J</p>
+            </div>
+        </section>
+
+        <section id="phan2" class="card">
+            <h2>Phần II: Công suất</h2>
+            <h4>1. Lý thuyết</h4>
+            <p>Công suất là đại lượng đặc trưng cho tốc độ thực hiện công của một lực, được xác định bằng công sinh ra trong một đơn vị thời gian. Công thức: $$P = \frac{A}{t}$$</p>
+
+            <h4>2. Hoạt động 3: "Ai làm việc nhanh hơn?"</h4>
+            <p>Một xe nâng A nâng 10 kiện hàng, mỗi kiện 50kg lên cao 4m trong 1 phút. Xe nâng B nâng 15 kiện hàng tương tự lên cao 3m trong 1 phút 15 giây. (Lấy g = 10 m/s²)</p>
+            <div class="calculator-grid">
+                <div>
+                    <label for="powerA">Công suất xe A (W):</label>
+                    <input type="number" id="powerA">
+                </div>
+                <div>
+                    <label for="powerB">Công suất xe B (W):</label>
+                    <input type="number" id="powerB">
+                </div>
+            </div>
+            <button onclick="checkPower()">Kiểm tra đáp án</button>
+            <div id="power-result-wrapper" style="margin-top: 15px;"></div>
+        </section>
+
+        <section id="phan3" class="card">
+            <h2>Phần III: Luyện tập củng cố</h2>
+            
+            <h4>1. Hoạt động 4: "Ghép công thức"</h4>
+            <div class="drag-and-drop">
+                <div class="draggable-items" id="drag-items">
+                    <div class="draggable" draggable="true" id="drag-A">A</div>
+                    <div class="draggable" draggable="true" id="drag-F">F</div>
+                    <div class="draggable" draggable="true" id="drag-s">s</div>
+                    <div class="draggable" draggable="true" id="drag-P">P</div>
+                    <div class="draggable" draggable="true" id="drag-t">t</div>
+                </div>
+                <div class="drop-zones">
+                    <div class="drop-zone" data-formula="work"><span class="placeholder" data-pos="1" data-answer="drag-A">?</span> = <span class="placeholder" data-pos="2" data-answer="drag-F">?</span> ⋅ <span class="placeholder" data-pos="3" data-answer="drag-s">?</span></div>
+                    <div class="drop-zone" data-formula="power"><span class="placeholder" data-pos="1" data-answer="drag-P">?</span> = A / <span class="placeholder" data-pos="2" data-answer="drag-t">?</span></div>
+                </div>
+            </div>
+
+            <h4>2. Hoạt động 5: "Trắc nghiệm nhanh"</h4>
+            <div id="quick-quiz">
+                <div class="quiz-item">
+                    <p><strong>Câu 1:</strong> Đơn vị của công suất là gì?</p>
+                    <div class="quiz-option"><label><input type="radio" name="q-quiz-1" value="a"> Joule (J)</label></div>
+                    <div class="quiz-option"><label><input type="radio" name="q-quiz-1" value="b"> Newton (N)</label></div>
+                    <div class="quiz-option"><label><input type="radio" name="q-quiz-1" value="c" data-correct="true"> Watt (W)</label></div>
+                </div>
+                 <div class="quiz-item">
+                    <p><strong>Câu 2:</strong> Trường hợp nào sau đây công cơ học bằng 0?</p>
+                    <div class="quiz-option"><label><input type="radio" name="q-quiz-2" value="a"> Lực cùng phương, cùng chiều chuyển động.</label></div>
+                    <div class="quiz-option"><label><input type="radio" name="q-quiz-2" value="b" data-correct="true"> Lực vuông góc với phương chuyển động.</label></div>
+                    <div class="quiz-option"><label><input type="radio" name="q-quiz-2" value="c"> Lực cùng phương, ngược chiều chuyển động.</label></div>
+                </div>
+            </div>
+        </section>
+        
+        <section id="ai-chatbot-card" class="card">
+            <h3>🤖 Trợ lý AI</h3>
+            <p>Bạn còn thắc mắc gì về Công và Công suất không? Hãy hỏi tôi nhé!</p>
+            <div id="chat-window" class="chat-window">
+                <div class="chat-message ai-message">Chào bạn! Tôi có thể giúp gì cho bạn về bài học này?</div>
+            </div>
+            <div class="chat-input-area">
+                <input type="text" id="user-input" placeholder="Ví dụ: 1 mã lực bằng bao nhiêu W?">
+                <button id="send-button">Gửi</button>
+            </div>
+        </section>
+    </div>
+
+    <script>
+    document.addEventListener('DOMContentLoaded', function() {
+        // --- HOẠT ĐỘNG 1: CÓ CÔNG HAY KHÔNG? ---
+        window.checkWork = function(id, userAnswer) {
+            const feedbacks = {
+                1: { correct: true, text: "Đúng! Lực nâng và quãng đường cùng phương." },
+                2: { correct: false, text: "Sai. Khi lao đang bay, tay không còn tác dụng lực lên nó nữa." },
+                3: { correct: false, text: "Sai. Người không dịch chuyển (s=0) nên công bằng 0." },
+                4: { correct: false, text: "Sai. Tay có tác dụng lực nhưng quả tạ không dịch chuyển (s=0)." }
+            };
+            const feedbackEl = document.getElementById('feedback-' + id);
+            const isCorrect = feedbacks[id].correct === userAnswer;
+            feedbackEl.textContent = feedbacks[id].text;
+            feedbackEl.style.color = isCorrect ? 'var(--correct-color)' : 'var(--incorrect-color)';
+        }
+
+        // --- HOẠT ĐỘNG 2: MÁY TÍNH CÔNG ---
+        window.calculateWork = function() {
+            const F = parseFloat(document.getElementById('force').value);
+            const s = parseFloat(document.getElementById('distance').value);
+            const alpha = parseFloat(document.getElementById('angle').value);
+            const resultEl = document.getElementById('work-result');
+
+            if (isNaN(F) || isNaN(s) || isNaN(alpha)) {
+                resultEl.textContent = "Vui lòng nhập số hợp lệ.";
+                return;
+            }
+            const work = F * s * Math.cos(alpha * Math.PI / 180);
+            resultEl.textContent = `Kết quả: A = ${work.toFixed(2)} J`;
+        }
+
+        // --- HOẠT ĐỘNG 3: AI LÀM VIỆC NHANH HƠN? ---
+        window.checkPower = function() {
+            const powerA_user = parseFloat(document.getElementById('powerA').value);
+            const powerB_user = parseFloat(document.getElementById('powerB').value);
+            const resultWrapper = document.getElementById('power-result-wrapper');
+
+            const A_A = 10 * 50 * 10 * 4; // 20000 J
+            const t_A = 60; // s
+            const P_A = A_A / t_A; // ~333.33 W
+
+            const A_B = 15 * 50 * 10 * 3; // 22500 J
+            const t_B = 75; // s
+            const P_B = A_B / t_B; // 300 W
+
+            let feedback = `Đáp án đúng: P(A) ≈ ${P_A.toFixed(2)} W; P(B) = ${P_B.toFixed(2)} W. <br>`;
+            if (P_A > P_B) {
+                feedback += "Kết luận: Xe A có công suất lớn hơn, làm việc nhanh hơn.";
+            } else {
+                feedback += "Kết luận: Xe B có công suất lớn hơn, làm việc nhanh hơn.";
+            }
+             resultWrapper.innerHTML = feedback;
+        }
+
+        // --- HOẠT ĐỘNG 4: KÉO THẢ ---
+        const draggables = document.querySelectorAll('.draggable');
+        const dropZoneSpans = document.querySelectorAll('.drop-zone .placeholder');
+        let draggedItem = null;
+
+        draggables.forEach(item => {
+            item.addEventListener('dragstart', function() {
+                draggedItem = this;
+                setTimeout(() => this.style.display = 'none', 0);
+            });
+            item.addEventListener('dragend', function() {
+                setTimeout(() => {
+                    this.style.display = 'block';
+                    draggedItem = null;
+                }, 0);
+            });
+        });
+
+        dropZoneSpans.forEach(span => {
+            span.addEventListener('dragover', function(e) {
+                e.preventDefault();
+            });
+            span.addEventListener('dragenter', function(e) {
+                e.preventDefault();
+                this.style.backgroundColor = '#e0e0e0';
+            });
+            span.addEventListener('dragleave', function() {
+                this.style.backgroundColor = 'white';
+            });
+            span.addEventListener('drop', function() {
+                this.style.backgroundColor = 'white';
+                if (this.dataset.answer === draggedItem.id) {
+                    this.textContent = draggedItem.textContent;
+                    this.style.border = '2px solid var(--correct-color)';
+                    draggedItem.style.display = 'none'; // Giấu đi khi đã thả đúng
+                }
+            });
+        });
+        
+        // --- HOẠT ĐỘNG 5: TRẮC NGHIỆM NHANH ---
+        const quizOptions = document.querySelectorAll('#quick-quiz .quiz-option input[type="radio"]');
+        quizOptions.forEach(option => {
+            option.addEventListener('change', function() {
+                const name = this.name;
+                const selectedLabel = this.parentElement;
+                const allLabelsInGroup = document.querySelectorAll(`input[name="${name}"]`);
+
+                allLabelsInGroup.forEach(radio => {
+                    radio.parentElement.classList.remove('correct', 'incorrect');
+                });
+
+                if (this.dataset.correct) {
+                    selectedLabel.classList.add('correct');
+                } else {
+                    selectedLabel.classList.add('incorrect');
+                }
+            });
+        });
+    });
+    </script>
+</body>
+</html>
