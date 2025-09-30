@@ -1,0 +1,253 @@
+<!DOCTYPE html>
+<html lang="vi">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Bài 5: Khúc xạ ánh sáng</title>
+
+    <script src="https://cdn.jsdelivr.net/npm/marked/marked.min.js"></script>
+    
+    <script>
+        // 1. Định nghĩa mã bài học cho trang này
+        window.lessonId = 'khuc-xa-anh-sang';
+
+        // 2. Logic của Chatbot (nhúng trực tiếp để tạo file duy nhất)
+        document.addEventListener('DOMContentLoaded', () => {
+            const chatWindow = document.getElementById('chat-window');
+            const userInput = document.getElementById('user-input');
+            const sendButton = document.getElementById('send-button');
+
+            // URL của Web Service trung tâm
+            const AI_SERVICE_URL = 'https://ai-trung-tam-service.onrender.com'; // Thầy/cô giữ nguyên URL này
+            const LESSON_ID = window.lessonId || 'default';
+
+            if(sendButton){
+                sendButton.addEventListener('click', askAI);
+                userInput.addEventListener('keydown', (e) => {
+                    if (e.key === 'Enter') {
+                        askAI();
+                    }
+                });
+            }
+
+            function addMessageToChat(text, className) {
+                const messageElement = document.createElement('div');
+                messageElement.classList.add('chat-message', className);
+                chatWindow.appendChild(messageElement);
+                messageElement.innerHTML = marked.parse(text);
+                chatWindow.scrollTop = chatWindow.scrollHeight;
+                return messageElement;
+            }
+
+            async function askAI() {
+                const question = userInput.value.trim();
+                if (!question) return;
+                addMessageToChat(question, 'user-message');
+                userInput.value = '';
+                const waitingMessage = addMessageToChat('Trợ lý AI đang suy nghĩ...', 'ai-message');
+
+                try {
+                    const response = await fetch(`${AI_SERVICE_URL}/ask`, {
+                        method: 'POST',
+                        headers: { 'Content-Type': 'application/json' },
+                        body: JSON.stringify({ question: question, lesson_id: LESSON_ID })
+                    });
+                    if (!response.ok) throw new Error('Lỗi mạng hoặc server');
+                    const data = await response.json();
+                    waitingMessage.innerHTML = marked.parse(data.answer);
+                } catch (error) {
+                    waitingMessage.innerHTML = marked.parse('**Xin lỗi, đã có lỗi xảy ra!** Vui lòng thử lại sau.');
+                }
+            }
+        });
+    </script>
+
+    <style>
+        :root {
+            --primary-color: #0277bd; /* Xanh dương của nước */
+            --secondary-color: #ffd600; /* Vàng của ánh sáng */
+            --bg-color: #f4f8fa;
+            --card-bg-color: #ffffff;
+            --text-color: #333;
+            --correct-color: #2e7d32;
+            --incorrect-color: #c62828;
+        }
+        html { scroll-behavior: smooth; }
+        body { font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif; line-height: 1.6; background-color: var(--bg-color); color: var(--text-color); margin: 0; }
+        .container { max-width: 900px; margin: 0 auto; padding: 20px; }
+        header { background-color: var(--primary-color); color: white; padding: 1.5rem 0; text-align: center; margin-bottom: 30px; }
+        header h1 { margin: 0; }
+        .card { background-color: var(--card-bg-color); border-radius: 8px; box-shadow: 0 4px 12px rgba(0,0,0,0.1); padding: 25px; margin-bottom: 25px; }
+        h2, h3 { color: var(--primary-color); }
+        h2 { border-bottom: 2px solid var(--secondary-color); padding-bottom: 10px; margin-top: 0; }
+        button { background-color: var(--secondary-color); color: var(--text-color); border: none; padding: 10px 20px; font-size: 1em; border-radius: 5px; cursor: pointer; transition: background-color 0.3s; font-weight: bold; }
+        button:hover { background-color: #ffca00; }
+        
+        /* Phần I: Mô phỏng đũa gãy */
+        .straw-sim-container {
+            position: relative;
+            width: 250px;
+            height: 300px;
+            margin: 20px auto;
+            display: flex;
+            justify-content: center;
+            align-items: flex-end;
+        }
+        .glass {
+            width: 150px;
+            height: 200px;
+            background: linear-gradient(to top, #b3e5fc 0%, #b3e5fc 50%, transparent 50%, transparent 100%);
+            border: 5px solid #a0a0a0;
+            border-top: none;
+            border-radius: 0 0 20px 20px;
+        }
+        .straw {
+            position: absolute;
+            width: 8px;
+            height: 280px;
+            background-color: #fdd835;
+            transform-origin: bottom center;
+            transform: rotate(20deg);
+            bottom: 0px;
+        }
+        .straw-bottom {
+            position: absolute;
+            bottom: 0;
+            left: 0;
+            width: 100%;
+            height: 50%;
+            background-color: #fdd835;
+            transform-origin: top center;
+            transform: skewY(15deg);
+            overflow: hidden;
+        }
+        
+        /* Phần II: Thí nghiệm PhET */
+        .phet-container {
+            border: 2px solid var(--primary-color);
+            border-radius: 8px;
+            overflow: hidden;
+            margin-top: 20px;
+        }
+        .phet-container iframe {
+            display: block;
+            border: none;
+        }
+
+        /* Phần III: Trắc nghiệm */
+        .quiz-option { margin-bottom: 10px; }
+        .quiz-feedback { margin-top: 10px; font-style: italic; font-weight: bold; }
+        .quiz-feedback.correct { color: var(--correct-color); }
+        .quiz-feedback.incorrect { color: var(--incorrect-color); }
+
+        /* CSS Chatbot */
+        .chat-window { height: 300px; border: 1px solid #ccc; padding: 10px; overflow-y: auto; margin-bottom: 10px; border-radius: 5px; }
+        .chat-message { margin-bottom: 10px; line-height: 1.4; }
+        .user-message { text-align: right; }
+        .ai-message { background-color: #f1f1f1; padding: 10px; border-radius: 8px; display: inline-block; max-width: 90%; text-align: left; }
+        .chat-input-area { display: flex; gap: 10px; }
+        .chat-input-area input { flex-grow: 1; padding: 10px; border: 1px solid #ccc; border-radius: 5px; }
+    </style>
+</head>
+<body>
+    <header>
+        <h1>Bài 5: KHÚC XẠ ÁNH SÁNG</h1>
+    </header>
+
+    <div class="container">
+        <section id="phan1" class="card">
+            <h2>Phần I: Mô phỏng Hiện tượng Khúc xạ</h2>
+            <p>Chắc hẳn em đã từng thấy một chiếc đũa hay ống hút trông như bị "gãy" khi cắm vào cốc nước. Hãy cùng quan sát lại hiện tượng thú vị này qua mô phỏng dưới đây.</p>
+            <label for="straw-slider">Kéo thanh trượt để nhúng đũa vào nước:</label>
+            <input type="range" id="straw-slider" min="0" max="100" value="0" style="width: 100%;">
+            <div class="straw-sim-container">
+                <div class="glass"></div>
+                <div class="straw" id="sim-straw">
+                    <div class="straw-bottom"></div>
+                </div>
+            </div>
+        </section>
+
+        <section id="phan2" class="card">
+            <h2>Phần II: Khám phá với Thí nghiệm ảo PhET</h2>
+            <p>Để hiểu rõ hơn về định luật khúc xạ, em hãy tương tác với thí nghiệm ảo chuyên sâu từ PhET Colorado dưới đây. Hãy thử thay đổi góc tới, môi trường và quan sát sự thay đổi của tia khúc xạ nhé!</p>
+            <div class="phet-container">
+                <iframe src="https://phet.colorado.edu/sims/html/bending-light/latest/bending-light_vi.html" width="100%" height="500px" allowfullscreen></iframe>
+            </div>
+        </section>
+
+        <section id="ai-chatbot-card" class="card">
+            <h3>🤖 Trợ lý AI</h3>
+            <p>Bạn có thắc mắc gì về hiện tượng khúc xạ ánh sáng không? Hãy hỏi tôi nhé!</p>
+            <div id="chat-window" class="chat-window">
+                <div class="chat-message ai-message">Chào bạn! Tôi có thể giúp gì về bài học này?</div>
+            </div>
+            <div class="chat-input-area">
+                <input type="text" id="user-input" placeholder="Ví dụ: Chiết suất là gì?">
+                <button id="send-button">Gửi</button>
+            </div>
+        </section>
+
+        <section id="phan3" class="card">
+            <h2>Phần III: Luyện tập nhanh</h2>
+            <div id="quick-quiz">
+                <div class="quiz-item">
+                    <h4>Câu 1: Hiện tượng khúc xạ ánh sáng là hiện tượng tia sáng tới khi gặp mặt phân cách giữa hai môi trường trong suốt thì...</h4>
+                    <div class="quiz-option"><label><input type="radio" name="q1"> A. Bị hắt trở lại môi trường cũ.</label></div>
+                    <div class="quiz-option"><label><input type="radio" name="q1" data-correct="true"> B. Bị gãy khúc tại mặt phân cách và tiếp tục đi vào môi trường thứ hai.</label></div>
+                    <div class="quiz-option"><label><input type="radio" name="q1"> C. Truyền thẳng không đổi hướng.</label></div>
+                    <div class="quiz-feedback" id="feedback-q1"></div>
+                </div>
+                <hr>
+                <div class="quiz-item">
+                    <h4>Câu 2: Khi chiếu tia sáng từ không khí vào nước, góc khúc xạ (r) sẽ...</h4>
+                    <div class="quiz-option"><label><input type="radio" name="q2" data-correct="true"> A. Nhỏ hơn góc tới (i).</label></div>
+                    <div class="quiz-option"><label><input type="radio" name="q2"> B. Lớn hơn góc tới (i).</label></div>
+                    <div class="quiz-option"><label><input type="radio" name="q2"> C. Bằng góc tới (i).</label></div>
+                    <div class="quiz-feedback" id="feedback-q2"></div>
+                </div>
+                <hr>
+                <div class="quiz-item">
+                    <h4>Câu 3: Nguyên nhân chính gây ra hiện tượng khúc xạ là do...</h4>
+                    <div class="quiz-option"><label><input type="radio" name="q3"> A. Ánh sáng bị mỏi khi đi đường dài.</label></div>
+                    <div class="quiz-option"><label><input type="radio" name="q3"> B. Mặt phân cách không phẳng tuyệt đối.</label></div>
+                    <div class="quiz-option"><label><input type="radio" name="q3" data-correct="true"> C. Vận tốc ánh sáng thay đổi khi truyền từ môi trường này sang môi trường khác.</label></div>
+                    <div class="quiz-feedback" id="feedback-q3"></div>
+                </div>
+            </div>
+        </section>
+    </div>
+
+    <script>
+    document.addEventListener('DOMContentLoaded', function() {
+        // --- LOGIC CHO PHẦN I: MÔ PHỎNG ĐŨA GÃY ---
+        const slider = document.getElementById('straw-slider');
+        const straw = document.getElementById('sim-straw');
+        slider.addEventListener('input', function() {
+            // Giá trị slider từ 0 đến 100
+            const value = this.value; 
+            // Chuyển đổi thành vị trí 'bottom' từ -80px (bên ngoài) đến 20px (bên trong)
+            const bottomPosition = -80 + (value * 1); // 100/100 * 100 = 100. -80 + 100 = 20
+            straw.style.bottom = `${bottomPosition}px`;
+        });
+
+        // --- LOGIC CHO PHẦN III: TRẮC NGHIỆM NHANH ---
+        const quizRadios = document.querySelectorAll('#quick-quiz input[type="radio"]');
+        quizRadios.forEach(radio => {
+            radio.addEventListener('change', function() {
+                const name = this.name;
+                const feedbackEl = document.getElementById('feedback-' + name);
+                
+                if (this.dataset.correct) {
+                    feedbackEl.textContent = "Chính xác! Rất tốt.";
+                    feedbackEl.className = 'quiz-feedback correct';
+                } else {
+                    feedbackEl.textContent = "Chưa đúng. Hãy suy nghĩ lại nhé!";
+                    feedbackEl.className = 'quiz-feedback incorrect';
+                }
+            });
+        });
+    });
+    </script>
+</body>
+</html>
