@@ -5,6 +5,10 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Bài 5: Khúc xạ ánh sáng</title>
 
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/katex@0.16.10/dist/katex.min.css">
+    <script defer src="https://cdn.jsdelivr.net/npm/katex@0.16.10/dist/katex.min.js"></script>
+    <script defer src="https://cdn.jsdelivr.net/npm/katex@0.16.10/dist/contrib/auto-render.min.js" onload="renderMathInElement(document.body);"></script>
+
     <script src="https://cdn.jsdelivr.net/npm/marked/marked.min.js"></script>
     
     <script>
@@ -18,7 +22,7 @@
             const sendButton = document.getElementById('send-button');
 
             // URL của Web Service trung tâm
-            const AI_SERVICE_URL = 'https://ai-trung-tam-service.onrender.com'; // Thầy/cô giữ nguyên URL này
+            const AI_SERVICE_URL = 'https://ai-trung-tam-service.onrender.com';
             const LESSON_ID = window.lessonId || 'default';
 
             if(sendButton){
@@ -83,64 +87,58 @@
         button { background-color: var(--secondary-color); color: var(--text-color); border: none; padding: 10px 20px; font-size: 1em; border-radius: 5px; cursor: pointer; transition: background-color 0.3s; font-weight: bold; }
         button:hover { background-color: #ffca00; }
         
-        /* Phần I: Mô phỏng đũa gãy */
+        /* ===== CSS ĐÃ SỬA LỖI CHO MÔ PHỎNG CHIẾC ĐŨA ===== */
+        .straw-sim-wrapper {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+        }
         .straw-sim-container {
             position: relative;
             width: 250px;
             height: 300px;
-            margin: 20px auto;
             display: flex;
             justify-content: center;
-            align-items: flex-end;
+            align-items: center;
+            overflow: hidden; /* Che đi phần đũa bị thừa */
         }
         .glass {
+            position: absolute;
+            bottom: 0;
             width: 150px;
             height: 200px;
-            background: linear-gradient(to top, #b3e5fc 0%, #b3e5fc 50%, transparent 50%, transparent 100%);
+            background: #b3e5fc80; /* Màu nước có độ trong */
             border: 5px solid #a0a0a0;
-            border-top: none;
+            border-top: 3px solid #d0d0d0; /* Viền mặt nước */
             border-radius: 0 0 20px 20px;
+            z-index: 2; /* Nằm trên phần đũa */
         }
-        .straw {
+        .straw-container {
             position: absolute;
             width: 8px;
             height: 280px;
-            background-color: #fdd835;
-            transform-origin: bottom center;
-            transform: rotate(20deg);
-            bottom: 0px;
+            z-index: 1; /* Nằm dưới viền cốc nước */
         }
-        .straw-bottom {
+        #straw-top, #straw-bottom {
             position: absolute;
-            bottom: 0;
-            left: 0;
             width: 100%;
             height: 50%;
             background-color: #fdd835;
-            transform-origin: top center;
-            transform: skewY(15deg);
-            overflow: hidden;
         }
-        
-        /* Phần II: Thí nghiệm PhET */
-        .phet-container {
-            border: 2px solid var(--primary-color);
-            border-radius: 8px;
-            overflow: hidden;
-            margin-top: 20px;
+        #straw-top {
+            top: 0;
         }
-        .phet-container iframe {
-            display: block;
-            border: none;
+        #straw-bottom {
+            bottom: 0;
+            transform-origin: top center; /* Điểm gãy sẽ ở mặt nước */
         }
 
-        /* Phần III: Trắc nghiệm */
+        .phet-container { border: 2px solid var(--primary-color); border-radius: 8px; overflow: hidden; margin-top: 20px; }
+        .phet-container iframe { display: block; border: none; }
         .quiz-option { margin-bottom: 10px; }
         .quiz-feedback { margin-top: 10px; font-style: italic; font-weight: bold; }
         .quiz-feedback.correct { color: var(--correct-color); }
         .quiz-feedback.incorrect { color: var(--incorrect-color); }
-
-        /* CSS Chatbot */
         .chat-window { height: 300px; border: 1px solid #ccc; padding: 10px; overflow-y: auto; margin-bottom: 10px; border-radius: 5px; }
         .chat-message { margin-bottom: 10px; line-height: 1.4; }
         .user-message { text-align: right; }
@@ -155,15 +153,53 @@
     </header>
 
     <div class="container">
+        <section class="card">
+            <h2>📚 Lý thuyết</h2>
+            <p>Hiện tượng khúc xạ ánh sáng là hiện tượng tia sáng bị gãy khúc khi truyền xiên góc qua mặt phân cách giữa hai môi trường trong suốt khác nhau. Điều này giải thích tại sao các vật thể dưới nước trông có vẻ bị lệch hoặc gãy.</p>
+        </section>
+
+        <section id="kien-thuc-trong-tam" class="card">
+            <h2>📝 Tổng hợp Kiến thức Trọng tâm</h2>
+            <p>Dưới đây là những ghi nhớ quan trọng nhất của bài học mà các em cần nắm vững:</p>
+            <ul>
+                <li>
+                    <strong>Hiện tượng khúc xạ ánh sáng</strong> là hiện tượng tia sáng bị <strong>gãy khúc</strong> (thay đổi phương truyền) khi truyền xiên góc qua mặt phân cách giữa hai môi trường trong suốt khác nhau.
+                </li>
+                <li>
+                    <strong>Các khái niệm cơ bản:</strong>
+                    <ul>
+                        <li><strong>Tia tới (SI):</strong> Tia sáng đi tới mặt phân cách.</li>
+                        <li><strong>Tia khúc xạ (IR):</strong> Tia sáng tiếp tục đi vào môi trường thứ hai.</li>
+                        <li><strong>Pháp tuyến (NN'):</strong> Đường thẳng vuông góc với mặt phân cách tại điểm tới.</li>
+                        <li><strong>Góc tới (i):</strong> Góc hợp bởi tia tới và pháp tuyến.</li>
+                        <li><strong>Góc khúc xạ (r):</strong> Góc hợp bởi tia khúc xạ và pháp tuyến.</li>
+                    </ul>
+                </li>
+                <li>
+                    <strong>Quan hệ giữa góc tới và góc khúc xạ:</strong>
+                    <ul>
+                        <li>Khi ánh sáng truyền từ không khí vào nước, góc khúc xạ nhỏ hơn góc tới ($r < i$).</li>
+                        <li>Khi ánh sáng truyền từ nước ra không khí, góc khúc xạ lớn hơn góc tới ($r > i$).</li>
+                    </ul>
+                </li>
+                <li>
+                    <strong>Nguyên nhân:</strong> Hiện tượng khúc xạ xảy ra do <strong>vận tốc</strong> của ánh sáng thay đổi khi đi qua các môi trường khác nhau.
+                </li>
+            </ul>
+        </section>
+        
         <section id="phan1" class="card">
             <h2>Phần I: Mô phỏng Hiện tượng Khúc xạ</h2>
-            <p>Chắc hẳn em đã từng thấy một chiếc đũa hay ống hút trông như bị "gãy" khi cắm vào cốc nước. Hãy cùng quan sát lại hiện tượng thú vị này qua mô phỏng dưới đây.</p>
-            <label for="straw-slider">Kéo thanh trượt để nhúng đũa vào nước:</label>
-            <input type="range" id="straw-slider" min="0" max="100" value="0" style="width: 100%;">
-            <div class="straw-sim-container">
-                <div class="glass"></div>
-                <div class="straw" id="sim-straw">
-                    <div class="straw-bottom"></div>
+            <p>Quan sát hiện tượng một chiếc đũa trông như bị "gãy" khi cắm vào cốc nước. Đây chính là hiện tượng khúc xạ ánh sáng trong thực tế.</p>
+            <div class="straw-sim-wrapper">
+                <label for="straw-slider">Kéo thanh trượt để nhúng đũa vào nước:</label>
+                <input type="range" id="straw-slider" min="0" max="100" value="0" style="width: 100%; margin-top: 15px;">
+                <div class="straw-sim-container">
+                    <div class="straw-container" id="straw-container">
+                        <div id="straw-top"></div>
+                        <div id="straw-bottom"></div>
+                    </div>
+                    <div class="glass"></div>
                 </div>
             </div>
         </section>
@@ -220,23 +256,38 @@
 
     <script>
     document.addEventListener('DOMContentLoaded', function() {
-        // --- LOGIC CHO PHẦN I: MÔ PHỎNG ĐŨA GÃY ---
+        // --- LOGIC ĐÃ SỬA LỖI CHO MÔ PHỎNG CHIẾC ĐŨA ---
         const slider = document.getElementById('straw-slider');
-        const straw = document.getElementById('sim-straw');
-        slider.addEventListener('input', function() {
-            // Giá trị slider từ 0 đến 100
-            const value = this.value; 
-            // Chuyển đổi thành vị trí 'bottom' từ -80px (bên ngoài) đến 20px (bên trong)
-            const bottomPosition = -80 + (value * 1); // 100/100 * 100 = 100. -80 + 100 = 20
-            straw.style.bottom = `${bottomPosition}px`;
-        });
+        const strawContainer = document.getElementById('straw-container');
+        const strawBottom = document.getElementById('straw-bottom');
+        
+        function updateStraw() {
+            const value = slider.value; 
+            const topPosition = -50 + (value * 1.6); 
+            strawContainer.style.top = `${topPosition}px`;
+            
+            const waterLevel = 140; 
+            const strawMidPoint = topPosition + 140;
+            
+            if (strawMidPoint > waterLevel) {
+                const bendAmount = Math.min((strawMidPoint - waterLevel) / 4, 15);
+                strawBottom.style.transform = `skewY(${bendAmount}deg)`;
+            } else {
+                strawBottom.style.transform = 'skewY(0deg)';
+            }
+        }
+        
+        if (slider) {
+            slider.addEventListener('input', updateStraw);
+            updateStraw();
+        }
 
-        // --- LOGIC CHO PHẦN III: TRẮC NGHIỆM NHANH ---
+        // --- LOGIC CHO PHẦN TRẮC NGHIỆM NHANH ---
         const quizRadios = document.querySelectorAll('#quick-quiz input[type="radio"]');
         quizRadios.forEach(radio => {
             radio.addEventListener('change', function() {
                 const name = this.name;
-                const feedbackEl = document.getElementById('feedback-' + name);
+                const feedbackEl = document.getElementById('feedback-'- name);
                 
                 if (this.dataset.correct) {
                     feedbackEl.textContent = "Chính xác! Rất tốt.";
@@ -247,6 +298,16 @@
                 }
             });
         });
+
+        // --- Render công thức KaTeX ---
+        if (window.renderMathInElement) {
+            renderMathInElement(document.body, {
+                delimiters: [
+                    {left: '$$', right: '$$', display: true},
+                    {left: '$', right: '$', display: false}
+                ]
+            });
+        }
     });
     </script>
 </body>
