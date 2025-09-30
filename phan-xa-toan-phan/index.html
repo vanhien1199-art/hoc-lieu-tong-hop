@@ -1,0 +1,297 @@
+<!DOCTYPE html>
+<html lang="vi">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Bài 6: Phản xạ toàn phần</title>
+
+    <script src="https://cdn.jsdelivr.net/npm/marked/marked.min.js"></script>
+    
+    <script>
+        // 1. Định nghĩa mã bài học cho trang này
+        window.lessonId = 'phan-xa-toan-phan';
+
+        // 2. Logic của Chatbot (nhúng trực tiếp để tạo file duy nhất)
+        document.addEventListener('DOMContentLoaded', () => {
+            const chatWindow = document.getElementById('chat-window');
+            const userInput = document.getElementById('user-input');
+            const sendButton = document.getElementById('send-button');
+
+            const AI_SERVICE_URL = 'https://ai-trung-tam-service.onrender.com';
+            const LESSON_ID = window.lessonId || 'default';
+
+            if(sendButton){
+                sendButton.addEventListener('click', askAI);
+                userInput.addEventListener('keydown', (e) => { if (e.key === 'Enter') askAI(); });
+            }
+
+            function addMessageToChat(text, className) {
+                const messageElement = document.createElement('div');
+                messageElement.classList.add('chat-message', className);
+                chatWindow.appendChild(messageElement);
+                messageElement.innerHTML = marked.parse(text);
+                chatWindow.scrollTop = chatWindow.scrollHeight;
+                return messageElement;
+            }
+
+            async function askAI() {
+                const question = userInput.value.trim();
+                if (!question) return;
+                addMessageToChat(question, 'user-message');
+                userInput.value = '';
+                const waitingMessage = addMessageToChat('Trợ lý AI đang suy nghĩ...', 'ai-message');
+                try {
+                    const response = await fetch(`${AI_SERVICE_URL}/ask`, {
+                        method: 'POST',
+                        headers: { 'Content-Type': 'application/json' },
+                        body: JSON.stringify({ question: question, lesson_id: LESSON_ID })
+                    });
+                    if (!response.ok) throw new Error('Lỗi mạng hoặc server');
+                    const data = await response.json();
+                    waitingMessage.innerHTML = marked.parse(data.answer);
+                } catch (error) {
+                    waitingMessage.innerHTML = marked.parse('**Xin lỗi, đã có lỗi xảy ra!** Vui lòng thử lại sau.');
+                }
+            }
+        });
+    </script>
+
+    <style>
+        :root {
+            --primary-color: #3f51b5; /* Tím indigo */
+            --secondary-color: #ff4081; /* Hồng */
+            --bg-color: #f5f5f5;
+            --card-bg-color: #ffffff;
+            --text-color: #212121;
+            --correct-color: #4caf50;
+            --incorrect-color: #f44336;
+        }
+        body { font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; line-height: 1.7; background-color: var(--bg-color); color: var(--text-color); margin: 0; }
+        .container { max-width: 900px; margin: 0 auto; padding: 20px; }
+        header { background-color: var(--primary-color); color: white; padding: 2rem 1rem; text-align: center; margin-bottom: 30px; }
+        header h1 { margin: 0; font-size: 2.5em; }
+        .card { background-color: var(--card-bg-color); border-radius: 8px; box-shadow: 0 5px 15px rgba(0,0,0,0.08); padding: 30px; margin-bottom: 30px; }
+        h2, h3, h4 { color: var(--primary-color); }
+        h2 { border-bottom: 3px solid var(--secondary-color); padding-bottom: 10px; margin-top: 0; }
+        button { background-color: var(--secondary-color); color: white; border: none; padding: 12px 22px; font-size: 1em; border-radius: 5px; cursor: pointer; transition: all 0.3s ease; }
+        button:hover { background-color: #f50057; box-shadow: 0 2px 8px rgba(0,0,0,0.2); }
+        input[type="number"] { width: 100%; padding: 10px; border-radius: 5px; border: 1px solid #ccc; margin-bottom: 10px; box-sizing: border-box; }
+        
+        /* Phần I: Hướng dẫn PhET */
+        .phet-instructions ul { list-style-type: decimal; padding-left: 20px; }
+        .phet-instructions li { margin-bottom: 10px; }
+        .phet-container { border: 2px solid var(--primary-color); border-radius: 8px; overflow: hidden; margin-top: 20px; }
+        .phet-container iframe { display: block; border: none; }
+
+        /* Phần III: Mô phỏng Ứng dụng */
+        .simulation-box { border: 1px solid #ddd; border-radius: 8px; padding: 20px; margin-top: 20px; }
+        /* Hoạt ảnh Ảo ảnh */
+        .mirage-container { position: relative; height: 200px; background: linear-gradient(to top, #fff, #e3f2fd); border-radius: 5px; overflow: hidden; }
+        .road { position: absolute; bottom: 0; width: 100%; height: 30px; background: #616161; }
+        .light-ray-mirage { position: absolute; width: 150px; height: 100px; border-top: 3px dashed var(--secondary-color); border-radius: 50%; left: 50%; top: -20px; transform: translateX(-50%); animation: bend-light 4s ease-in-out infinite; }
+        @keyframes bend-light {
+            0% { transform: translateX(-50%) translateY(0) rotate(0); }
+            50% { transform: translateX(-50%) translateY(70px) rotate(20deg); }
+            100% { transform: translateX(-50%) translateY(0) rotate(0); }
+        }
+        /* Hoạt ảnh Sợi quang */
+        .fiber-container { position: relative; height: 50px; background-color: rgba(179, 229, 252, 0.3); border-top: 2px solid #01579b; border-bottom: 2px solid #01579b; border-radius: 25px; margin-top: 15px; overflow: hidden; }
+        .light-ray-fiber { position: absolute; width: 10px; height: 10px; background-color: var(--secondary-color); border-radius: 50%; top: 20px; left: -10px; }
+        .light-ray-fiber.animate { animation: bounce-fiber 5s linear infinite; }
+        @keyframes bounce-fiber {
+            0% { left: -10px; top: 20px; }
+            25% { left: 25%; top: 0; }
+            50% { left: 50%; top: 20px; }
+            75% { left: 75%; top: 40px; }
+            100% { left: 105%; top: 20px; }
+        }
+        
+        /* Phần IV: Luyện tập */
+        .quiz-option { display: block; margin: 10px 0; }
+        .feedback { margin-top: 10px; font-weight: bold; }
+        .feedback.correct { color: var(--correct-color); }
+        .feedback.incorrect { color: var(--incorrect-color); }
+
+        /* CSS Chatbot */
+        .chat-window { height: 300px; border: 1px solid #ccc; padding: 10px; overflow-y: auto; margin-bottom: 10px; border-radius: 5px; }
+        .chat-message { margin-bottom: 10px; line-height: 1.4; }
+        .user-message { text-align: right; }
+        .ai-message { background-color: #f1f1f1; padding: 10px; border-radius: 8px; display: inline-block; max-width: 90%; text-align: left; }
+        .chat-input-area { display: flex; gap: 10px; }
+        .chat-input-area input { flex-grow: 1; padding: 10px; border: 1px solid #ccc; border-radius: 5px; }
+    </style>
+</head>
+<body>
+    <header>
+        <h1>Bài 6: PHẢN XẠ TOÀN PHẦN</h1>
+    </header>
+
+    <div class="container">
+        <section id="phan1" class="card">
+            <h2>Phần I: Khám phá Hiện tượng với Thí nghiệm ảo PhET</h2>
+            <div class="phet-instructions">
+                <p>Sử dụng thí nghiệm PhET bên dưới, hãy làm theo các bước sau:</p>
+                <ul>
+                    <li>Chọn môi trường ở trên là <strong>Nước (Water)</strong> và môi trường ở dưới là <strong>Không khí (Air)</strong>.</li>
+                    <li>Dùng thước đo góc. Kéo đèn laze để từ từ <strong>tăng góc tới i</strong> từ 0 độ.</li>
+                    <li>Quan sát độ sáng của tia khúc xạ và tia phản xạ. Chuyện gì xảy ra khi góc tới i đủ lớn? Hãy tìm góc tới mà tại đó <strong>tia khúc xạ biến mất hoàn toàn</strong>.</li>
+                </ul>
+            </div>
+            <div class="phet-container">
+                <iframe src="https://phet.colorado.edu/sims/html/bending-light/latest/bending-light_vi.html" width="100%" height="500px" allowfullscreen></iframe>
+            </div>
+        </section>
+
+        <section id="phan2" class="card">
+            <h2>Phần II: Điều kiện và Công thức</h2>
+            <h4>1. Lý thuyết</h4>
+            <p>Phản xạ toàn phần là hiện tượng phản xạ toàn bộ tia sáng tới, xảy ra ở mặt phân cách giữa hai môi trường trong suốt. Hiện tượng này chỉ xảy ra khi thỏa mãn <strong>đồng thời 2 điều kiện</strong>:</p>
+            <ol>
+                <li>Ánh sáng truyền từ một môi trường có chiết suất lớn sang môi trường có chiết suất nhỏ hơn (n₁ > n₂).</li>
+                <li>Góc tới lớn hơn hoặc bằng góc giới hạn phản xạ toàn phần (i ≥ i<sub>gh</sub>).</li>
+            </ol>
+            <p>Góc giới hạn được tính bằng công thức: <strong>sin(i<sub>gh</sub>) = n₂ / n₁</strong></p>
+            
+            <h4>2. Hoạt động: "Máy tính Góc giới hạn"</h4>
+            <div>
+                <label for="n1">Chiết suất môi trường tới (n₁):</label>
+                <input type="number" id="n1" step="0.01" value="1.33">
+                <label for="n2">Chiết suất môi trường khúc xạ (n₂):</label>
+                <input type="number" id="n2" step="0.01" value="1.00">
+                <button onclick="calculateCriticalAngle()">Tính toán</button>
+                <p id="critical-angle-result" style="font-weight: bold; margin-top: 10px;"></p>
+            </div>
+        </section>
+
+        <section id="phan3" class="card">
+            <h2>Phần III: Mô phỏng các Ứng dụng</h2>
+            <div class="simulation-box">
+                <h4>1. Hiện tượng Ảo ảnh (Mirage)</h4>
+                <p>Vào ngày nắng nóng, mặt đường nóng làm lớp không khí sát mặt đường có chiết suất nhỏ hơn các lớp không khí bên trên. Ánh sáng từ bầu trời xanh chiếu xuống bị bẻ cong dần và phản xạ toàn phần đến mắt ta, tạo ra ảnh ảo của bầu trời trông giống như một vũng nước.</p>
+                <div class="mirage-container">
+                    <div class="road"></div>
+                    <div class="light-ray-mirage"></div>
+                </div>
+            </div>
+            <div class="simulation-box">
+                <h4>2. Sợi quang (Optical Fiber)</h4>
+                <p>Cáp quang là ứng dụng quan trọng nhất của hiện tượng phản xạ toàn phần, dùng để truyền tín hiệu internet. Ánh sáng được truyền đi trong lõi sợi quang và phản xạ toàn phần liên tục ở mặt phân cách giữa lõi và vỏ.</p>
+                <button id="fiber-btn">Bật/Tắt đèn</button>
+                <div class="fiber-container">
+                    <div class="light-ray-fiber" id="fiber-ray"></div>
+                </div>
+            </div>
+        </section>
+
+        <section id="ai-chatbot-card" class="card">
+            <h3>🤖 Trợ lý AI</h3>
+            <p>Bạn có thắc mắc gì về hiện tượng Phản xạ toàn phần không? Hãy hỏi tôi!</p>
+            <div id="chat-window" class="chat-window">
+                <div class="chat-message ai-message">Chào bạn! Tôi có thể giúp gì về bài học này?</div>
+            </div>
+            <div class="chat-input-area">
+                <input type="text" id="user-input" placeholder="Ví dụ: Cáp quang hoạt động thế nào?">
+                <button id="send-button">Gửi</button>
+            </div>
+        </section>
+
+        <section id="phan4" class="card">
+            <h2>Phần IV: Luyện tập</h2>
+            <div id="practice-quiz">
+                <div class="quiz-item">
+                    <h4>Câu 1: Để có hiện tượng phản xạ toàn phần, cần thỏa mãn đồng thời những điều kiện nào sau đây? (Chọn nhiều đáp án)</h4>
+                    <fieldset id="q1-fieldset">
+                        <label class="quiz-option"><input type="checkbox" name="q1" value="a" data-correct="true"> Ánh sáng truyền từ môi trường chiết quang hơn sang môi trường kém chiết quang hơn (n₁ > n₂).</label>
+                        <label class="quiz-option"><input type="checkbox" name="q1" value="b"> Ánh sáng truyền từ môi trường kém chiết quang hơn sang môi trường chiết quang hơn (n₁ < n₂).</label>
+                        <label class="quiz-option"><input type="checkbox" name="q1" value="c" data-correct="true"> Góc tới lớn hơn hoặc bằng góc giới hạn (i ≥ i<sub>gh</sub>).</label>
+                        <label class="quiz-option"><input type="checkbox" name="q1" value="d"> Góc tới nhỏ hơn góc giới hạn (i < i<sub>gh</sub>).</label>
+                    </fieldset>
+                    <button onclick="checkMultiChoice()">Kiểm tra Câu 1</button>
+                    <div class="feedback" id="feedback-q1"></div>
+                </div>
+                <hr>
+                <div class="quiz-item">
+                    <h4>Câu 2: Ứng dụng quan trọng nhất của hiện tượng phản xạ toàn phần là gì?</h4>
+                    <div class="quiz-option"><label><input type="radio" name="q2" value="a"> Tạo ảo ảnh trên sa mạc.</label></div>
+                    <div class="quiz-option"><label><input type="radio" name="q2" value="b" data-correct="true"> Chế tạo sợi quang để truyền thông tin.</label></div>
+                    <div class="quiz-option"><label><input type="radio" name="q2" value="c"> Làm cho kim cương lấp lánh.</label></div>
+                    <div class="feedback" id="feedback-q2"></div>
+                </div>
+            </div>
+        </section>
+    </div>
+
+    <script>
+    document.addEventListener('DOMContentLoaded', function() {
+        // --- PHẦN II: MÁY TÍNH GÓC GIỚI HẠN ---
+        window.calculateCriticalAngle = function() {
+            const n1 = parseFloat(document.getElementById('n1').value);
+            const n2 = parseFloat(document.getElementById('n2').value);
+            const resultEl = document.getElementById('critical-angle-result');
+
+            if (isNaN(n1) || isNaN(n2)) {
+                resultEl.textContent = "Vui lòng nhập số hợp lệ.";
+                return;
+            }
+
+            if (n1 <= n2) {
+                resultEl.textContent = "Không xảy ra phản xạ toàn phần vì n₁ ≤ n₂.";
+            } else {
+                const sin_igh = n2 / n1;
+                const igh_rad = Math.asin(sin_igh);
+                const igh_deg = igh_rad * 180 / Math.PI;
+                resultEl.textContent = `Góc giới hạn: i(gh) ≈ ${igh_deg.toFixed(2)} độ.`;
+            }
+        }
+
+        // --- PHẦN III: HOẠT ẢNH SỢI QUANG ---
+        const fiberBtn = document.getElementById('fiber-btn');
+        const fiberRay = document.getElementById('fiber-ray');
+        if (fiberBtn) {
+            fiberBtn.addEventListener('click', function() {
+                fiberRay.classList.toggle('animate');
+            });
+        }
+
+        // --- PHẦN IV: LUYỆN TẬP ---
+        // Câu 1: Chọn nhiều đáp án
+        window.checkMultiChoice = function() {
+            const correctAnswers = ['a', 'c'];
+            const selectedAnswers = [];
+            document.querySelectorAll('input[name="q1"]:checked').forEach(checkbox => {
+                selectedAnswers.push(checkbox.value);
+            });
+
+            const feedbackEl = document.getElementById('feedback-q1');
+            // So sánh hai mảng
+            const isCorrect = correctAnswers.length === selectedAnswers.length && 
+                              correctAnswers.every(val => selectedAnswers.includes(val));
+
+            if (isCorrect) {
+                feedbackEl.textContent = "Chính xác! Bạn đã hiểu rõ điều kiện xảy ra phản xạ toàn phần.";
+                feedbackEl.className = 'feedback correct';
+            } else {
+                feedbackEl.textContent = "Chưa đúng. Hãy nhớ lại 2 điều kiện cần và đủ nhé!";
+                feedbackEl.className = 'feedback incorrect';
+            }
+        }
+
+        // Câu 2 trở đi: Trắc nghiệm 1 đáp án
+        const radioQuizzes = document.querySelectorAll('#practice-quiz input[type="radio"]');
+        radioQuizzes.forEach(radio => {
+            radio.addEventListener('change', function() {
+                const name = this.name;
+                const feedbackEl = document.getElementById('feedback-' + name);
+                if (this.dataset.correct) {
+                    feedbackEl.textContent = "Đúng rồi!";
+                    feedbackEl.className = 'feedback correct';
+                } else {
+                    feedbackEl.textContent = "Chưa chính xác, hãy thử lại.";
+                    feedbackEl.className = 'feedback incorrect';
+                }
+            });
+        });
+    });
+    </script>
+</body>
+</html>
