@@ -2,24 +2,423 @@
 <html lang="vi">
 <head>
     <meta charset="UTF-8">
-    <title>Danh sách Học liệu KHTN</title>
-    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/skeleton/2.0.4/skeleton.min.css">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Bài 7: Lăng kính</title>
+
+    <script src="https://cdn.jsdelivr.net/npm/marked/marked.min.js"></script>
+    
+    <script>
+        // 1. Định nghĩa mã bài học cho trang này
+        window.lessonId = 'lang-kinh';
+
+        // 2. Logic của Chatbot (nhúng trực tiếp để tạo file duy nhất)
+        document.addEventListener('DOMContentLoaded', () => {
+            const chatWindow = document.getElementById('chat-window');
+            const userInput = document.getElementById('user-input');
+            const sendButton = document.getElementById('send-button');
+            const AI_SERVICE_URL = 'https://ai-trung-tam-service.onrender.com';
+            const LESSON_ID = window.lessonId || 'default';
+
+            if(sendButton){
+                sendButton.addEventListener('click', askAI);
+                userInput.addEventListener('keydown', (e) => { if (e.key === 'Enter') askAI(); });
+            }
+
+            function addMessageToChat(text, className) {
+                const messageElement = document.createElement('div');
+                messageElement.classList.add('chat-message', className);
+                chatWindow.appendChild(messageElement);
+                messageElement.innerHTML = marked.parse(text);
+                chatWindow.scrollTop = chatWindow.scrollHeight;
+                return messageElement;
+            }
+
+            async function askAI() {
+                const question = userInput.value.trim();
+                if (!question) return;
+                addMessageToChat(question, 'user-message');
+                userInput.value = '';
+                const waitingMessage = addMessageToChat('Trợ lý AI đang suy nghĩ...', 'ai-message');
+                try {
+                    const response = await fetch(`${AI_SERVICE_URL}/ask`, {
+                        method: 'POST',
+                        headers: { 'Content-Type': 'application/json' },
+                        body: JSON.stringify({ question: question, lesson_id: LESSON_ID })
+                    });
+                    if (!response.ok) throw new Error('Lỗi mạng hoặc server');
+                    const data = await response.json();
+                    waitingMessage.innerHTML = marked.parse(data.answer);
+                } catch (error) {
+                    waitingMessage.innerHTML = marked.parse('**Xin lỗi, đã có lỗi xảy ra!** Vui lòng thử lại sau.');
+                }
+            }
+        });
+    </script>
+
+    <style>
+        :root {
+            --primary-color: #673ab7; /* Tím */
+            --secondary-color: #00bcd4; /* Xanh lơ */
+            --bg-color: #f3e5f5;
+            --card-bg-color: #ffffff;
+            --text-color: #333;
+            --correct-color: #4caf50;
+            --incorrect-color: #f44336;}
+        body { font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; line-height: 1.7; background-color: var(--bg-color); color: var(--text-color); margin: 0; }
+        .container { max-width: 900px; margin: 0 auto; padding: 20px; }
+        header { background-color: var(--primary-color); color: white; padding: 2rem 1rem; text-align: center; margin-bottom: 30px; }
+        header h1 { margin: 0; font-size: 2.5em; }
+        .card { background-color: var(--card-bg-color); border-radius: 8px; box-shadow: 0 5px 15px rgba(0,0,0,0.08); padding: 30px; margin-bottom: 30px; }
+        h2, h3, h4 { color: var(--primary-color); }
+        h2 { border-bottom: 3px solid var(--secondary-color); padding-bottom: 10px; margin-top: 0; }
+        button { background-color: var(--secondary-color); color: white; border: none; padding: 12px 22px; font-size: 1em; border-radius: 5px; cursor: pointer; transition: all 0.3s ease; }
+        button:hover { background-color: #00acc1; box-shadow: 0 2px 8px rgba(0,0,0,0.2); }
+	/* ===== CSS CHO NÚT HOME TRÊN HEADER ===== */
+header {
+    position: relative; /* Cần thiết để định vị nút con (home-btn) bên trong */
+    text-align: center; /* Vẫn giữ cho tiêu đề H1 ở giữa */
+}
+
+.home-btn {
+    position: absolute; /* Định vị nút so với thẻ header */
+    top: 50%; /* Đặt nút ở giữa theo chiều dọc */
+    left: 20px; /* Cách lề trái 20px */
+    transform: translateY(-50%); /* Căn nút vào giữa một cách hoàn hảo */
+    
+    font-size: 28px; /* Kích thước của icon ngôi nhà */
+    color: white;
+    text-decoration: none;
+    opacity: 0.8;
+    transition: opacity 0.3s, transform 0.3s;
+}
+
+.home-btn:hover {
+    opacity: 1;
+    transform: translateY(-50%) scale(1.1); /* Hiệu ứng phóng to nhẹ khi di chuột qua */
+}
+	/* ===== CSS CHO FOOTER ===== */
+	.site-footer {
+    background-color: #333;color: #f1f1f1;padding: 10px 0;font-size: 0.9em;}
+	.footer-grid {display: grid;grid-template-columns: repeat(auto-fit, minmax(350px, 1fr));gap: 20px;}
+	.site-footer h4 {
+    color: var(--secondary-color, #ffc107); /* Dùng màu phụ nếu có, nếu không thì dùng màu vàng */
+    margin-top: 0;
+    border-bottom: 1px solid #555;
+    padding-bottom: 5px;}.site-footer ul {list-style-type: none;padding: 0;}.site-footer ul li {margin-bottom: 8px;}.site-footer a {color: #f1f1f1;text-decoration: none;transition: color 0.3s;}
+.site-footer a:hover {color: var(--secondary-color, #ffc107);text-decoration: underline;}
+        /* ===== CSS CHO NÚT LÊN ĐẦU TRANG ===== */
+#back-to-top-btn {
+    display: none; /* Ẩn ban đầu */
+    position: fixed;
+    bottom: 20px;
+    right: 20px;
+    z-index: 99;
+    border: none;
+    outline: none;
+    background-color: var(--secondary-color, #ffc107);
+    color: white;
+    cursor: pointer;
+    padding: 10px;
+    border-radius: 50%;
+    font-size: 18px;
+    width: 50px;
+    height: 50px;
+    text-align: center;
+    line-height: 30px;
+    text-decoration: none;
+    box-shadow: 0 4px 8px rgba(0,0,0,0.2);
+}
+
+#back-to-top-btn:hover {
+    background-color: var(--primary-color, #0056b3);
+}
+        /* Phần I: PhET */
+        .phet-instructions ul { list-style-type: '👉'; padding-left: 20px; }
+        .phet-instructions li { margin-bottom: 10px; }
+        .phet-container { border: 2px solid var(--primary-color); border-radius: 8px; overflow: hidden; margin-top: 20px; }
+        .phet-container iframe { display: block; border: none; }
+        
+        /* Phần II: Tương tác màu sắc */
+        .color-sim-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 40px; }
+        /* Trộn màu cộng */
+        #additive-mixing { position: relative; width: 250px; height: 250px; margin: 20px auto; }
+        .rgb-circle { width: 150px; height: 150px; border-radius: 50%; position: absolute; mix-blend-mode: screen; }
+        #red-circle { background-color: red; top: 0; left: 50px; }
+        #green-circle { background-color: lime; top: 80px; left: 0; }
+        #blue-circle { background-color: blue; top: 80px; left: 100px; }
+        /* Màu sắc vật thể */
+        #subtractive-mixing { display: flex; flex-direction: column; align-items: center; gap: 15px; }
+        #object-display { position: relative; width: 150px; height: 150px; display: flex; justify-content: center; align-items: center; }
+        #apple-object { width: 100px; height: 100px; transition: background-color 0.3s; border-radius: 50% 50% 40% 40% / 60% 60% 40% 40%; }
+        #light-filter { position: absolute; width: 100%; height: 100%; transition: background-color 0.3s; }
+        .controls fieldset { border: 1px solid #ccc; border-radius: 5px; padding: 10px; }
+
+        /* Phần IV: Luyện tập */
+        /* Kéo thả quang phổ */
+        #spectrum-dnd { margin-top: 20px; }
+        .color-sources { display: flex; flex-wrap: wrap; gap: 10px; justify-content: center; margin-bottom: 20px; padding: 10px; background: #eee; border-radius: 5px;}
+        .color-swatch { width: 50px; height: 50px; border-radius: 5px; cursor: grab; border: 2px solid white; box-shadow: 0 2px 5px rgba(0,0,0,0.2); }
+        .spectrum-slots { display: flex; gap: 5px; justify-content: center; background: linear-gradient(to right, #333, #111); padding: 10px; border-radius: 5px;}
+        .spectrum-slot { width: 50px; height: 50px; border: 2px dashed #666; border-radius: 5px; }
+        .spectrum-slot.over { border-style: solid; background-color: #444; }
+        .spectrum-slot.correct { border-style: solid; border-color: var(--correct-color); }
+        /* Trắc nghiệm */
+        .quiz-option { display: block; margin: 10px 0; }
+        .feedback { margin-top: 10px; font-weight: bold; }
+        .feedback.correct { color: var(--correct-color); }
+        .feedback.incorrect { color: var(--incorrect-color); }
+
+        /* CSS Chatbot */
+        .chat-window { height: 300px; border: 1px solid #ccc; padding: 10px; overflow-y: auto; margin-bottom: 10px; border-radius: 5px; }
+        .chat-message { margin-bottom: 10px; line-height: 1.4; }
+        .user-message { text-align: right; }
+        .ai-message { background-color: #f1f1f1; padding: 10px; border-radius: 8px; display: inline-block; max-width: 90%; text-align: left; }
+        .chat-input-area { display: flex; gap: 10px; }
+        .chat-input-area input { flex-grow: 1; padding: 10px; border: 1px solid #ccc; border-radius: 5px; }
+        @media (max-width: 768px) { .color-sim-grid { grid-template-columns: 1fr; } }
+    </style>
 </head>
 <body>
+    <header>
+	 <a href="/" class="home-btn" title="Về trang chủ">🏠</a>
+        <h1>Bài 7: LĂNG KÍNH</h1>
+    </header>
+
     <div class="container">
-        <h1>Danh sách Học liệu Khoa học Tự nhiên</h1>
-        <p>Chọn một bài học để bắt đầu:</p>
-        <ul>
-            <li><a href="/bai-1/">Bài học: Đo Tốc độ</a></li>
-            <li><a href="/bai-2/">Bài học: Cơ năng</a></li>
-            <li><a href="/cong-cong-suat/">Bài học: Công và công suất</a></li>
-              <li><a href="/khuc-xa-anh-sang/">Bài học: Khúc xạ áng sáng</a></li>
-            <li><a href="/phan-xa-toan-phan/">Bài học: Phản xạ toàn phần</a></li>
+        <section id="phan1" class="card">
+            <h2>Phần I: Thí nghiệm Tán sắc ánh sáng với PhET</h2>
+            <div class="phet-instructions">
+                <p>Sử dụng thí nghiệm PhET bên dưới, hãy chọn hình dạng lăng kính tam giác. Chiếu chùm ánh sáng trắng để quan sát dải màu quang phổ. Sau đó, hãy chuyển sang chùm sáng đơn sắc (ví dụ màu đỏ) và quan sát sự khác biệt.</p>
+            </div>
+            <div class="phet-container">
+                <iframe src="https://phet.colorado.edu/sims/html/bending-light/latest/bending-light_vi.html" width="100%" height="500px" allowfullscreen></iframe>
+            </div>
+        </section>
+
+        <section id="phan2" class="card">
+            <h2>Phần II: Tương tác với Màu sắc</h2>
+            <div class="color-sim-grid">
+                <div>
+                    <h4>1. Hoạt động: "Trộn màu Ánh sáng" (Hệ màu cộng)</h4>
+                    <p>Ánh sáng có 3 màu cơ bản là Đỏ (Red), Lục (Green), Lam (Blue). Khi chiếu chồng các chùm sáng này lên nhau, chúng sẽ tạo ra các màu mới.</p>
+                    <div id="additive-mixing">
+                        <div class="rgb-circle" id="red-circle"></div>
+                        <div class="rgb-circle" id="green-circle"></div>
+                        <div class="rgb-circle" id="blue-circle"></div>
+                    </div>
+                </div>
+                <div>
+                    <h4>2. Hoạt động: "Màu sắc của Vật thể"</h4>
+                    <p>Màu của vật là màu ánh sáng mà nó phản xạ. Hãy xem quả táo sẽ có màu gì dưới các ánh sáng khác nhau.</p>
+                    <div id="subtractive-mixing">
+                        <div id="object-display">
+                            <div id="apple-object"></div>
+                            <div id="light-filter"></div>
+                        </div>
+                        <div class="controls">
+                            <fieldset>
+                                <legend>Chọn màu quả táo</legend>
+                                <label><input type="radio" name="appleColor" value="red" checked> Đỏ</label>
+                                <label><input type="radio" name="appleColor" value="green"> Lục</label>
+                                <label><input type="radio" name="appleColor" value="white"> Trắng</label>
+                            </fieldset>
+                            <fieldset>
+                                <legend>Chọn màu ánh sáng chiếu vào</legend>
+                                <label><input type="radio" name="lightColor" value="white" checked> Trắng</label>
+                                <label><input type="radio" name="lightColor" value="red"> Đỏ</label>
+                                <label><input type="radio" name="lightColor" value="green"> Lục</label>
+                            </fieldset>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <section id="phan3" class="card">
+            <h2>Phần III: Ghi nhớ</h2>
+            <ul>
+                <li>Lăng kính có tác dụng phân tích một chùm ánh sáng trắng thành nhiều chùm sáng màu khác nhau. Đây là hiện tượng <strong>tán sắc ánh sáng</strong>.</li>
+                <li>Dải màu thu được có thứ tự: <strong>Đỏ, Cam, Vàng, Lục, Lam, Chàm, Tím</strong>. Màu đỏ bị lệch ít nhất, màu tím bị lệch nhiều nhất.</li>
+                <li>Ánh sáng có một màu nhất định và không bị tán sắc khi qua lăng kính được gọi là <strong>ánh sáng đơn sắc</strong>.</li>
+                <li>Màu sắc của vật là màu của ánh sáng mà nó phản xạ. Vật màu <strong>trắng</strong> phản xạ tất cả các màu, vật màu <strong>đen</strong> hấp thụ tất cả các màu.</li>
             </ul>
+        </section>
+
+        <section id="ai-chatbot-card" class="card">
+            <h3>🤖 Trợ lý AI</h3>
+            <p>Bạn có thắc mắc gì về lăng kính và sự tán sắc ánh sáng không?</p>
+            <div id="chat-window" class="chat-window">
+                <div class="chat-message ai-message">Chào bạn! Tôi có thể giúp gì về bài học này?</div>
+            </div>
+            <div class="chat-input-area">
+                <input type="text" id="user-input" placeholder="Ví dụ: Cầu vồng hình thành thế nào?">
+                <button id="send-button">Gửi</button>
+            </div>
+        </section>
+
+        <section id="phan4" class="card">
+            <h2>Phần IV: Luyện tập</h2>
+            <div id="practice-section">
+                <h4>1. Bài tập: "Sắp xếp Quang phổ"</h4>
+                <p>Kéo các thẻ màu vào đúng vị trí của dải màu tán sắc (Đỏ bị lệch ít nhất, Tím bị lệch nhiều nhất).</p>
+                <div id="spectrum-dnd">
+                    <div class="color-sources"></div>
+                    <div class="spectrum-slots"></div>
+                    <button id="check-spectrum" style="margin-top: 15px;">Kiểm tra</button>
+                    <div class="feedback" id="feedback-spectrum"></div>
+                </div>
+                <hr>
+                <h4>2. Bài tập: "Trắc nghiệm nhanh"</h4>
+                <div class="quiz-item">
+                    <p><strong>Câu 1:</strong> Hiện tượng ánh sáng trắng qua lăng kính bị phân tách thành các màu khác nhau gọi là gì?</p>
+                    <div class="quiz-option"><label><input type="radio" name="q1" value="a" data-correct="true"> Tán sắc ánh sáng.</label></div>
+                    <div class="quiz-option"><label><input type="radio" name="q1" value="b"> Phản xạ ánh sáng.</label></div>
+                    <div class="quiz-option"><label><input type="radio" name="q1" value="c"> Khúc xạ ánh sáng.</label></div>
+                    <div class="feedback" id="feedback-q1"></div>
+                </div>
+                 <div class="quiz-item">
+                    <p><strong>Câu 2:</strong> Vật màu đỏ sẽ trông có màu gì khi được chiếu bởi ánh sáng màu lục?</p>
+                    <div class="quiz-option"><label><input type="radio" name="q2" value="a"> Màu đỏ.</label></div>
+                    <div class="quiz-option"><label><input type="radio" name="q2" value="b"> Màu vàng.</label></div>
+                    <div class="quiz-option"><label><input type="radio" name="q2" value="c" data-correct="true"> Gần như màu đen.</label></div>
+                    <div class="feedback" id="feedback-q2"></div>
+                </div>
+            </div>
+        </section>
     </div>
+
+    <script>
+    document.addEventListener('DOMContentLoaded', function() {
+        // --- PHẦN II: MÀU SẮC CỦA VẬT THỂ ---
+        const appleObject = document.getElementById('apple-object');
+        const lightFilter = document.getElementById('light-filter');
+        const appleColorRadios = document.querySelectorAll('input[name="appleColor"]');
+        const lightColorRadios = document.querySelectorAll('input[name="lightColor"]');
+
+        function updateAppleColor() {
+            const appleColor = document.querySelector('input[name="appleColor"]:checked').value;
+            const lightColor = document.querySelector('input[name="lightColor"]:checked').value;
+
+            let perceivedColor = 'black'; // Mặc định là màu đen (hấp thụ hết)
+            lightFilter.style.backgroundColor = lightColor === 'white' ? 'rgba(255,255,255,0.1)' : lightColor+'80';
+
+            if (appleColor === 'white') {
+                perceivedColor = lightColor === 'white' ? 'white' : lightColor;
+            } else if (appleColor === lightColor || lightColor === 'white') {
+                perceivedColor = appleColor;
+            }
+            appleObject.style.backgroundColor = perceivedColor;
+        }
+        appleColorRadios.forEach(radio => radio.addEventListener('change', updateAppleColor));
+        lightColorRadios.forEach(radio => radio.addEventListener('change', updateAppleColor));
+        updateAppleColor(); // Chạy lần đầu
+// Thêm vào bên trong document.addEventListener('DOMContentLoaded', function() { ... });
+
+// --- LOGIC CHO NÚT "LÊN ĐẦU TRANG" ---
+const backToTopBtn = document.getElementById("back-to-top-btn");
+
+window.onscroll = function() {
+    if (document.body.scrollTop > 100 || document.documentElement.scrollTop > 100) {
+        backToTopBtn.style.display = "block";
+    } else {
+        backToTopBtn.style.display = "none";
+    }
+};
+
+// --- Cập nhật năm bản quyền tự động ---
+document.getElementById('copyright-year').textContent = new Date().getFullYear();
+
+        // --- PHẦN IV: KÉO THẢ QUANG PHỔ ---
+        const colors = [
+            { id: 'red', name: 'Đỏ', hex: '#f44336' }, { id: 'orange', name: 'Cam', hex: '#ff9800' },
+            { id: 'yellow', name: 'Vàng', hex: '#ffeb3b' }, { id: 'green', name: 'Lục', hex: '#4caf50' },
+            { id: 'blue', name: 'Lam', hex: '#2196f3' }, { id: 'indigo', name: 'Chàm', hex: '#3f51b5' },
+            { id: 'violet', name: 'Tím', hex: '#9c27b0' }
+        ];
+        const colorSources = document.querySelector('.color-sources');
+        const spectrumSlots = document.querySelector('.spectrum-slots');
+        
+        // Tạo các thẻ màu và ô trống
+        colors.slice().sort(() => Math.random() - 0.5).forEach(color => { // Xáo trộn
+            const swatch = document.createElement('div');
+            swatch.className = 'color-swatch';
+            swatch.id = color.id;
+            swatch.style.backgroundColor = color.hex;
+            swatch.draggable = true;
+            colorSources.appendChild(swatch);
+        });
+        colors.forEach((color, index) => {
+            const slot = document.createElement('div');
+            slot.className = 'spectrum-slot';
+            slot.dataset.index = index;
+            slot.dataset.answer = color.id;
+            spectrumSlots.appendChild(slot);
+        });
+        
+        let draggedItem = null;
+        document.querySelectorAll('.color-swatch').forEach(item => {
+            item.addEventListener('dragstart', e => { draggedItem = e.target; });
+        });
+        document.querySelectorAll('.spectrum-slot').forEach(slot => {
+            slot.addEventListener('dragover', e => e.preventDefault());
+            slot.addEventListener('drop', e => {
+                e.preventDefault();
+                if (e.target.classList.contains('spectrum-slot') && !e.target.firstChild) {
+                    e.target.appendChild(draggedItem);
+                }
+            });
+        });
+        
+        document.getElementById('check-spectrum').addEventListener('click', () => {
+            let correctCount = 0;
+            document.querySelectorAll('.spectrum-slot').forEach(slot => {
+                slot.classList.remove('correct');
+                if (slot.firstChild && slot.firstChild.id === slot.dataset.answer) {
+                    correctCount++;
+                    slot.classList.add('correct');
+                }
+            });
+            const feedbackEl = document.getElementById('feedback-spectrum');
+            feedbackEl.textContent = `Bạn đã xếp đúng ${correctCount}/7 màu.`;
+            feedbackEl.className = correctCount === 7 ? 'feedback correct' : 'feedback incorrect';
+        });
+
+        // --- PHẦN IV: TRẮC NGHIỆM NHANH ---
+        const radioQuizzes = document.querySelectorAll('#practice-section input[type="radio"]');
+        radioQuizzes.forEach(radio => {
+            radio.addEventListener('change', function() {
+                const name = this.name;
+                const feedbackEl = document.getElementById('feedback-' + name);
+                if (this.dataset.correct) {
+                    feedbackEl.textContent = "Chính xác!";
+                    feedbackEl.className = 'feedback correct';
+                } else {
+                    feedbackEl.textContent = "Chưa đúng, hãy xem lại nhé.";
+                    feedbackEl.className = 'feedback incorrect';
+                }
+            });
+        });
+    });
+    </script>
+<footer class="site-footer">
+    <div class="container">
+        <div class="footer-grid">
+            <div>
+                <h4>Nguồn tham khảo</h4>
+                <ul>
+                    <li>Sách giáo khoa Khoa học tự nhiên 9 - Bộ sách Kết nối tri thức với cuộc sống.</li>
+                    <li>Thí nghiệm ảo từ PhET Interactive Simulations, Đại học Colorado Boulder.</li>
+                </ul>
+            </div>
+                    <div>
+                <h4>Bản quyền & Liên hệ</h4>
+                <p>&copy; <span id="copyright-year">2025</span> - vanhien</p>
+                <p>Mọi ý kiến đóng góp xin gửi về địa chỉ email: <a href="mailto:gopy@example.com">vanhien1199@gmail.com</a></p>
+            </div>
+        </div>
+    </div>
+</footer>
+<a href="#page-top" id="back-to-top-btn" title="Lên đầu trang">⬆️</a>
+<body id="page-top">
 </body>
-
 </html>
-
-
-
