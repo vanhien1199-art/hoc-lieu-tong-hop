@@ -1,0 +1,302 @@
+<!DOCTYPE html>
+<html lang="vi">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Bài 9: Thực hành - Đo tiêu cự thấu kính hội tụ</title>
+
+    <script src="https://cdn.jsdelivr.net/npm/marked/marked.min.js"></script>
+    
+    <script>
+        // 1. Định nghĩa mã bài học cho trang này
+        window.lessonId = 'do-tieu-cu';
+
+        // 2. Logic của Chatbot (nhúng trực tiếp)
+        document.addEventListener('DOMContentLoaded', () => {
+            const chatWindow = document.getElementById('chat-window');
+            const userInput = document.getElementById('user-input');
+            const sendButton = document.getElementById('send-button');
+            const AI_SERVICE_URL = 'https://ai-trung-tam-service.onrender.com';
+            const LESSON_ID = window.lessonId || 'default';
+
+            if(sendButton){
+                sendButton.addEventListener('click', askAI);
+                userInput.addEventListener('keydown', (e) => { if (e.key === 'Enter') askAI(); });
+            }
+
+            function addMessageToChat(text, className) {
+                const messageElement = document.createElement('div');
+                messageElement.classList.add('chat-message', className);
+                chatWindow.appendChild(messageElement);
+                messageElement.innerHTML = marked.parse(text);
+                chatWindow.scrollTop = chatWindow.scrollHeight;
+                return messageElement;
+            }
+
+            async function askAI() {
+                const question = userInput.value.trim();
+                if (!question) return;
+                addMessageToChat(question, 'user-message');
+                userInput.value = '';
+                const waitingMessage = addMessageToChat('Trợ lý AI đang suy nghĩ...', 'ai-message');
+                try {
+                    const response = await fetch(`${AI_SERVICE_URL}/ask`, {
+                        method: 'POST',
+                        headers: { 'Content-Type': 'application/json' },
+                        body: JSON.stringify({ question: question, lesson_id: LESSON_ID })
+                    });
+                    if (!response.ok) throw new Error('Lỗi mạng hoặc server');
+                    const data = await response.json();
+                    waitingMessage.innerHTML = marked.parse(data.answer);
+                } catch (error) {
+                    waitingMessage.innerHTML = marked.parse('**Xin lỗi, đã có lỗi xảy ra!**');
+                }
+            }
+        });
+    </script>
+
+    <style>
+        :root {
+            --primary-color: #00695c; /* Xanh lá đậm */
+            --secondary-color: #ffab00; /* Vàng cam */
+            --bg-color: #e0f2f1;
+            --card-bg-color: #ffffff;
+            --text-color: #212121;
+        }
+        body { font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; line-height: 1.7; background-color: var(--bg-color); color: var(--text-color); margin: 0; }
+        .container { max-width: 1100px; margin: 0 auto; padding: 20px; }
+        header { background-color: var(--primary-color); color: white; padding: 1.5rem 1rem; text-align: center; margin-bottom: 30px; position: relative; }
+        header h1 { margin: 0; font-size: 2.2em; }
+        .card { background-color: var(--card-bg-color); border-radius: 8px; box-shadow: 0 5px 15px rgba(0,0,0,0.08); padding: 30px; margin-bottom: 30px; }
+        h2, h3, h4 { color: var(--primary-color); }
+        h2 { border-bottom: 3px solid var(--secondary-color); padding-bottom: 10px; margin-top: 0; }
+        button { background-color: var(--secondary-color); color: var(--text-color); border: none; padding: 12px 22px; font-size: 1em; border-radius: 5px; cursor: pointer; transition: all 0.3s ease; }
+        button:hover { background-color: #ff8f00; }
+        input[type="number"] { padding: 8px; border-radius: 5px; border: 1px solid #ccc; max-width: 100px; text-align: center; }
+        
+        .home-btn { position: absolute; top: 50%; left: 20px; transform: translateY(-50%); font-size: 28px; color: white; text-decoration: none; opacity: 0.8; transition: opacity 0.3s, transform 0.3s; }
+        .home-btn:hover { opacity: 1; transform: translateY(-50%) scale(1.1); }
+
+        /* Bố cục phòng thí nghiệm */
+        .lab-layout {
+            display: grid;
+            grid-template-columns: 2fr 1fr;
+            gap: 30px;
+        }
+        .phet-container { border: 2px solid var(--primary-color); border-radius: 8px; overflow: hidden; }
+        .phet-container iframe { display: block; border: none; }
+        .instructions { background-color: #e8f5e9; padding: 20px; border-radius: 8px; border-left: 5px solid var(--primary-color); }
+        .instructions ul { list-style-type: none; padding-left: 0; }
+        .instructions li { margin-bottom: 15px; }
+        .instructions li strong { color: var(--primary-color); }
+        
+        /* Bảng báo cáo */
+        .report-table { width: 100%; border-collapse: collapse; margin-top: 20px; }
+        .report-table th, .report-table td { border: 1px solid #ddd; padding: 12px; text-align: center; }
+        .report-table thead { background-color: var(--primary-color); color: white; }
+        .report-table tfoot { font-weight: bold; background-color: #f0f0f0; }
+
+        /* CSS Chatbot, Footer, Back-to-Top */
+        .chat-window { height: 300px; border: 1px solid #ccc; padding: 10px; overflow-y: auto; margin-bottom: 10px; border-radius: 5px; }
+        .chat-message { margin-bottom: 10px; }
+        .user-message { text-align: right; }
+        .ai-message { background-color: #f1f1f1; padding: 10px; border-radius: 8px; display: inline-block; max-width: 90%; text-align: left; }
+        .chat-input-area { display: flex; gap: 10px; }
+        .chat-input-area input { flex-grow: 1; padding: 10px; border: 1px solid #ccc; border-radius: 5px; }
+        .site-footer { background-color: #333; color: #f1f1f1; padding: 30px 0; font-size: 0.9em; }
+        .footer-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(250px, 1fr)); gap: 20px; }
+        .site-footer h4 { color: var(--secondary-color); }
+        .site-footer ul { list-style-type: none; padding: 0; }
+        .site-footer a { color: #f1f1f1; text-decoration: none; }
+        .site-footer a:hover { color: var(--secondary-color); }
+        #back-to-top-btn { display: none; position: fixed; bottom: 20px; right: 20px; z-index: 99; background-color: var(--secondary-color); color: white; cursor: pointer; padding: 10px; border-radius: 50%; font-size: 18px; width: 50px; height: 50px; text-align: center; line-height: 30px; text-decoration: none; box-shadow: 0 4px 8px rgba(0,0,0,0.2); border: none;}
+        #back-to-top-btn:hover { background-color: var(--primary-color); }
+        
+        @media (max-width: 800px) {
+            .lab-layout { grid-template-columns: 1fr; }
+        }
+    </style>
+</head>
+<body id="page-top">
+    <header>
+        <a href="/" class="home-btn" title="Về trang chủ">🏠</a>
+        <h1>Bài 9: Thực hành ảo - Đo tiêu cự của Thấu kính hội tụ</h1>
+    </header>
+
+    <div class="container">
+        <section id="phan1" class="card">
+            <h2>Phần I: Phòng thí nghiệm ảo với PhET</h2>
+            <div class="lab-layout">
+                <div class="phet-container">
+                    <iframe src="https://phet.colorado.edu/sims/html/geometric-optics/latest/geometric-optics_vi.html" width="100%" height="550px" allowfullscreen></iframe>
+                </div>
+                <div class="instructions">
+                    <h4>Hướng dẫn thực hành (Phương pháp Silbermann)</h4>
+                    <ul>
+                        <li><strong>Bước 1:</strong> Trong mô phỏng, hãy bật 'Nhiều tia' và dùng 'Thước đo'.</li>
+                        <li><strong>Bước 2:</strong> Kéo vật (cây bút chì) ra thật xa về phía bên trái màn hình (để các tia tới gần như song song với trục chính).</li>
+                        <li><strong>Bước 3:</strong> Quan sát vị trí ảnh thật được tạo ra ở bên phải. Dùng thước đo khoảng cách từ tâm thấu kính đến ảnh đó.</li>
+                        <li><strong>Bước 4:</strong> Khoảng cách bạn vừa đo chính là tiêu cự <strong>f</strong> của thấu kính. Hãy ghi lại kết quả vào Bảng 9.1 bên dưới.</li>
+                    </ul>
+                    <hr>
+                    <h4>Mở rộng:</h4>
+                    <p>Thầy/cô cũng có thể hướng dẫn học sinh đo tiêu cự bằng cách đặt vật ở vị trí d > f bất kỳ, đo khoảng cách ảnh d', sau đó áp dụng công thức thấu kính để tính f.</p>
+                </div>
+            </div>
+        </section>
+
+        <section id="phan2" class="card">
+            <h2>Phần II: Báo cáo thí nghiệm tương tác</h2>
+            <h4>Bảng 9.1: Kết quả thí nghiệm</h4>
+            <p>Hãy nhập số liệu đo được từ thí nghiệm vào các ô tương ứng. Các giá trị trung bình sẽ được tự động tính toán.</p>
+            <table class="report-table">
+                <thead>
+                    <tr>
+                        <th>Lần đo</th>
+                        <th>d (cm)</th>
+                        <th>d' (cm)</th>
+                        <th>h (cm)</th>
+                        <th>h' (cm)</th>
+                        <th>f (cm)</th>
+                    </tr>
+                </thead>
+                <tbody id="report-body">
+                    <tr>
+                        <td>1</td>
+                        <td><input type="number" class="d-input"></td>
+                        <td><input type="number" class="d-prime-input"></td>
+                        <td><input type="number" class="h-input"></td>
+                        <td><input type="number" class="h-prime-input"></td>
+                        <td><input type="number" class="f-input"></td>
+                    </tr>
+                    <tr>
+                        <td>2</td>
+                        <td><input type="number" class="d-input"></td>
+                        <td><input type="number" class="d-prime-input"></td>
+                        <td><input type="number" class="h-input"></td>
+                        <td><input type="number" class="h-prime-input"></td>
+                        <td><input type="number" class="f-input"></td>
+                    </tr>
+                    <tr>
+                        <td>3</td>
+                        <td><input type="number" class="d-input"></td>
+                        <td><input type="number" class="d-prime-input"></td>
+                        <td><input type="number" class="h-input"></td>
+                        <td><input type="number" class="h-prime-input"></td>
+                        <td><input type="number" class="f-input"></td>
+                    </tr>
+                </tbody>
+                <tfoot>
+                    <tr>
+                        <td><strong>Trung bình</strong></td>
+                        <td id="d-avg"></td>
+                        <td id="d-prime-avg"></td>
+                        <td id="h-avg"></td>
+                        <td id="h-prime-avg"></td>
+                        <td id="f-avg"></td>
+                    </tr>
+                </tfoot>
+            </table>
+        </section>
+
+        <section id="phan3" class="card">
+            <h2>Phần III: Công cụ tính toán & Kiểm tra</h2>
+            <h4>Máy tính Thấu kính</h4>
+            <p>Sử dụng công cụ này để kiểm tra lại kết quả tính tiêu cự f từ các giá trị d và d' bạn đo được.</p>
+            <div>
+                <label for="calc-d">Khoảng cách vật d (cm):</label>
+                <input type="number" id="calc-d">
+            </div>
+            <div>
+                <label for="calc-d-prime">Khoảng cách ảnh d' (cm):</label>
+                <input type="number" id="calc-d-prime">
+            </div>
+            <button onclick="calculateFocalLength()">Tính Tiêu cự</button>
+            <p id="focal-length-result" style="font-weight: bold; margin-top: 15px;"></p>
+        </section>
+        
+        <section id="ai-chatbot-card" class="card">
+            <h3>🤖 Trợ lý AI</h3>
+            <p>Bạn có thắc mắc gì về bài thực hành hoặc các công thức liên quan không?</p>
+            <div id="chat-window" class="chat-window">
+                <div class="chat-message ai-message">Chào bạn! Tôi có thể giúp gì về bài thực hành này?</div>
+            </div>
+            <div class="chat-input-area">
+                <input type="text" id="user-input" placeholder="Ví dụ: Công thức thấu kính là gì?">
+                <button id="send-button">Gửi</button>
+            </div>
+        </section>
+    </div>
+
+    <footer class="site-footer">
+        <div class="container">
+            <div class="footer-grid">
+                <div><h4>Nguồn tham khảo</h4><ul><li>Sách giáo khoa KHTN 9 - Bộ sách Kết nối tri thức.</li><li>PhET Interactive Simulations.</li></ul></div>
+                <div><h4>Về trang web</h4><ul><li><a href="/">Về trang danh sách học liệu</a></li></ul></div>
+                <div><h4>Bản quyền & Liên hệ</h4><p>&copy; <span id="copyright-year"></span> - nungvanhien</p><p>Góp ý xin gửi về: <a href="mailto:gopy@example.com">vanhien1199@gmail.com</a></p></div>
+            </div>
+        </div>
+    </footer>
+    <a href="#page-top" id="back-to-top-btn" title="Lên đầu trang">⬆️</a>
+
+    <script>
+    document.addEventListener('DOMContentLoaded', function() {
+        // --- PHẦN II: BÁO CÁO TƯƠNG TÁC ---
+        const reportInputs = document.querySelectorAll('#report-body input');
+        
+        function calculateAverages() {
+            const columns = ['d', 'd-prime', 'h', 'h-prime', 'f'];
+            columns.forEach(col => {
+                const inputs = document.querySelectorAll(`.${col}-input`);
+                let sum = 0;
+                let count = 0;
+                inputs.forEach(input => {
+                    const value = parseFloat(input.value);
+                    if (!isNaN(value)) {
+                        sum += value;
+                        count++;
+                    }
+                });
+                const avg = count > 0 ? (sum / count).toFixed(2) : '';
+                document.getElementById(`${col}-avg`).textContent = avg;
+            });
+        }
+        
+        reportInputs.forEach(input => {
+            input.addEventListener('input', calculateAverages);
+        });
+
+        // --- PHẦN III: MÁY TÍNH THẤU KÍNH ---
+        window.calculateFocalLength = function() {
+            const d = parseFloat(document.getElementById('calc-d').value);
+            const d_prime = parseFloat(document.getElementById('calc-d-prime').value);
+            const resultEl = document.getElementById('focal-length-result');
+
+            if (isNaN(d) || isNaN(d_prime) || d === 0 || d_prime === 0) {
+                resultEl.textContent = "Vui lòng nhập d và d' hợp lệ (khác 0).";
+                return;
+            }
+            // 1/f = 1/d + 1/d' => f = 1 / (1/d + 1/d')
+            const f = 1 / ((1 / d) + (1 / d_prime));
+            resultEl.textContent = `Kết quả tính được: f ≈ ${f.toFixed(2)} cm.`;
+        }
+
+        // --- FOOTER & BACK-TO-TOP ---
+        const backToTopBtn = document.getElementById("back-to-top-btn");
+        if(backToTopBtn){
+            window.onscroll = function() {
+                if (document.body.scrollTop > 100 || document.documentElement.scrollTop > 100) {
+                    backToTopBtn.style.display = "block";
+                } else {
+                    backToTopBtn.style.display = "none";
+                }
+            };
+        }
+        const yearSpan = document.getElementById('copyright-year');
+        if (yearSpan) {
+            yearSpan.textContent = new Date().getFullYear();
+        }
+    });
+    </script>
+</body>
+</html>
