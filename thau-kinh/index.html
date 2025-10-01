@@ -1,0 +1,395 @@
+<!DOCTYPE html>
+<html lang="vi">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Bài 8: Thấu kính</title>
+
+    <script src="https://cdn.jsdelivr.net/npm/marked/marked.min.js"></script>
+    
+    <script>
+        window.lessonId = 'thau-kinh';
+        document.addEventListener('DOMContentLoaded', () => {
+            const chatWindow = document.getElementById('chat-window');
+            const userInput = document.getElementById('user-input');
+            const sendButton = document.getElementById('send-button');
+            const AI_SERVICE_URL = 'https://ai-trung-tam-service.onrender.com';
+            const LESSON_ID = window.lessonId || 'default';
+            if(sendButton){
+                sendButton.addEventListener('click', askAI);
+                userInput.addEventListener('keydown', (e) => { if (e.key === 'Enter') askAI(); });
+            }
+            function addMessageToChat(text, className) {
+                const messageElement = document.createElement('div');
+                messageElement.classList.add('chat-message', className);
+                chatWindow.appendChild(messageElement);
+                messageElement.innerHTML = marked.parse(text);
+                chatWindow.scrollTop = chatWindow.scrollHeight;
+                return messageElement;
+            }
+            async function askAI() {
+                const question = userInput.value.trim();
+                if (!question) return;
+                addMessageToChat(question, 'user-message');
+                userInput.value = '';
+                const waitingMessage = addMessageToChat('Trợ lý AI đang suy nghĩ...', 'ai-message');
+                try {
+                    const response = await fetch(`${AI_SERVICE_URL}/ask`, {
+                        method: 'POST',
+                        headers: { 'Content-Type': 'application/json' },
+                        body: JSON.stringify({ question: question, lesson_id: LESSON_ID })
+                    });
+                    if (!response.ok) throw new Error('Lỗi mạng hoặc server');
+                    const data = await response.json();
+                    waitingMessage.innerHTML = marked.parse(data.answer);
+                } catch (error) {
+                    waitingMessage.innerHTML = marked.parse('**Xin lỗi, đã có lỗi xảy ra!**');
+                }
+            }
+        });
+    </script>
+
+    <style>
+        :root {
+            --primary-color: #1a237e; /* Xanh navy đậm */
+            --secondary-color: #ffca28; /* Vàng hổ phách */
+            --bg-color: #e8eaf6;
+            --card-bg-color: #ffffff;
+            --text-color: #212121;
+            --correct-color: #4caf50;
+            --incorrect-color: #f44336;
+        }
+        body { font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; line-height: 1.7; background-color: var(--bg-color); color: var(--text-color); margin: 0; }
+        .container { max-width: 900px; margin: 0 auto; padding: 20px; }
+        header { background-color: var(--primary-color); color: white; padding: 1.5rem 1rem; text-align: center; margin-bottom: 30px; position: relative; }
+        header h1 { margin: 0; font-size: 2.5em; }
+        .card { background-color: var(--card-bg-color); border-radius: 8px; box-shadow: 0 5px 15px rgba(0,0,0,0.08); padding: 30px; margin-bottom: 30px; }
+        h2, h3, h4 { color: var(--primary-color); }
+        h2 { border-bottom: 3px solid var(--secondary-color); padding-bottom: 10px; margin-top: 0; }
+        button { background-color: var(--secondary-color); color: var(--text-color); border: none; padding: 12px 22px; font-size: 1em; border-radius: 5px; cursor: pointer; transition: all 0.3s ease; }
+        button:hover { background-color: #ffb300; }
+        
+        .home-btn { position: absolute; top: 50%; left: 20px; transform: translateY(-50%); font-size: 28px; color: white; text-decoration: none; opacity: 0.8; transition: opacity 0.3s, transform 0.3s; }
+        .home-btn:hover { opacity: 1; transform: translateY(-50%) scale(1.1); }
+
+        /* Phần I: PhET */
+        .phet-instructions ul { list-style-type: '🔬'; padding-left: 20px; }
+        .phet-container { border: 2px solid var(--primary-color); border-radius: 8px; overflow: hidden; margin-top: 20px; }
+        .phet-container iframe { display: block; border: none; }
+        
+        /* Phần II: Mô phỏng TKHT */
+        .lens-sim-container { display: flex; flex-direction: column; align-items: center; gap: 15px; }
+        #lens-svg { border: 1px solid #ccc; background-color: #fdfdfd; width: 100%; }
+        #image-description { font-weight: bold; color: var(--primary-color); min-height: 2em; text-align: center; }
+
+        /* Phần IV: Luyện tập */
+        .feedback { margin-top: 10px; font-weight: bold; }
+        .feedback.correct { color: var(--correct-color); }
+        .feedback.incorrect { color: var(--incorrect-color); }
+        .dnd-container { display: flex; gap: 20px; margin-top: 20px; }
+        .dnd-source, .dnd-target { border: 1px solid #ccc; padding: 10px; border-radius: 5px; }
+        .dnd-source { width: 150px; }
+        .dnd-target { flex-grow: 1; }
+        .dnd-target h5 { margin-top: 0; }
+        .draggable { background-color: #eee; padding: 5px 10px; border: 1px solid #ddd; border-radius: 4px; margin-bottom: 5px; cursor: grab; }
+        .drop-zone { border: 2px dashed #aaa; min-height: 40px; border-radius: 5px; margin-top: 10px; padding: 5px; }
+        .drop-zone.over { background-color: #e0e0e0; }
+
+        /* CSS Chatbot */
+        .chat-window { height: 300px; border: 1px solid #ccc; padding: 10px; overflow-y: auto; margin-bottom: 10px; border-radius: 5px; }
+        .chat-message { margin-bottom: 10px; }
+        .user-message { text-align: right; }
+        .ai-message { background-color: #f1f1f1; padding: 10px; border-radius: 8px; display: inline-block; max-width: 90%; text-align: left; }
+        .chat-input-area { display: flex; gap: 10px; }
+        .chat-input-area input { flex-grow: 1; padding: 10px; border: 1px solid #ccc; border-radius: 5px; }
+
+        /* Footer & Back-to-Top */
+        .site-footer { background-color: #333; color: #f1f1f1; padding: 30px 0; font-size: 0.9em; }
+        .footer-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(250px, 1fr)); gap: 20px; }
+        .site-footer h4 { color: var(--secondary-color); }
+        .site-footer ul { list-style-type: none; padding: 0; }
+        .site-footer a { color: #f1f1f1; text-decoration: none; }
+        .site-footer a:hover { color: var(--secondary-color); }
+        #back-to-top-btn { display: none; position: fixed; bottom: 20px; right: 20px; z-index: 99; background-color: var(--secondary-color); color: white; cursor: pointer; padding: 10px; border-radius: 50%; font-size: 18px; width: 50px; height: 50px; text-align: center; line-height: 30px; text-decoration: none; box-shadow: 0 4px 8px rgba(0,0,0,0.2); border: none;}
+        #back-to-top-btn:hover { background-color: var(--primary-color); }
+    </style>
+</head>
+<body id="page-top">
+    <header>
+        <a href="/" class="home-btn" title="Về trang chủ">🏠</a>
+        <h1>Bài 8: THẤU KÍNH</h1>
+    </header>
+
+    <div class="container">
+        <section id="phan1" class="card">
+            <h2>Phần I: Thí nghiệm ảo tổng quan với PhET</h2>
+            <div class="phet-instructions">
+                <p>Sử dụng mô phỏng PhET dưới đây để tìm hiểu về thấu kính. Hãy thử chọn giữa thấu kính hội tụ và phân kì, thay đổi vị trí của vật, tiêu cự của thấu kính và quan sát sự thay đổi của ảnh tạo ra.</p>
+            </div>
+            <div class="phet-container">
+                <iframe src="https://phet.colorado.edu/sims/html/geometric-optics/latest/geometric-optics_vi.html" width="100%" height="550px" allowfullscreen></iframe>
+            </div>
+        </section>
+
+        <section id="phan2" class="card">
+            <h2>Phần II: Khám phá đặc điểm ảnh qua Thấu kính hội tụ</h2>
+            <div class="lens-sim-container">
+                <svg id="lens-svg" viewBox="0 0 800 300"></svg>
+                <div>
+                    <label for="object-slider">Di chuyển vật (nến) dọc theo trục chính:</label>
+                    <input type="range" id="object-slider" min="10" max="390" value="300" style="width: 100%;">
+                </div>
+                <div id="image-description"></div>
+            </div>
+        </section>
+
+        <section id="phan3" class="card">
+            <h2>Phần III: Kiến thức cốt lõi cần nhớ</h2>
+            <ul>
+                <li><strong>Phân loại:</strong>
+                    <ul>
+                        <li><strong>Thấu kính hội tụ (TKHT):</strong> Có phần rìa mỏng hơn phần giữa, có tác dụng hội tụ chùm tia sáng song song.</li>
+                        <li><strong>Thấu kính phân kì (TKPK):</strong> Có phần rìa dày hơn phần giữa, có tác dụng phân kì chùm tia sáng song song.</li>
+                    </ul>
+                </li>
+                <li><strong>Đường đi 3 tia sáng đặc biệt qua thấu kính:</strong>
+                    <ol>
+                        <li>Tia tới đi qua quang tâm (O) thì tia ló tiếp tục truyền thẳng.</li>
+                        <li>Tia tới song song với trục chính thì tia ló (hoặc đường kéo dài) đi qua tiêu điểm ảnh (F').</li>
+                        <li>Tia tới (hoặc đường kéo dài) đi qua tiêu điểm vật (F) thì tia ló song song với trục chính.</li>
+                    </ol>
+                </li>
+                <li><strong>Ảnh tạo bởi Thấu kính hội tụ (TKHT):</strong>
+                    <ul>
+                        <li>Vật ở rất xa: Cho ảnh thật tại tiêu điểm F'.</li>
+                        <li>Vật ở ngoài khoảng tiêu cự (d > f): Cho ảnh thật, ngược chiều với vật.</li>
+                        <li>Vật ở trong khoảng tiêu cự (d < f): Cho ảnh ảo, cùng chiều, lớn hơn vật.</li>
+                    </ul>
+                </li>
+                <li><strong>Ảnh tạo bởi Thấu kính phân kì (TKPK):</strong>
+                    <ul>
+                        <li>Luôn cho ảnh ảo, cùng chiều, nhỏ hơn vật và nằm trong khoảng từ quang tâm đến tiêu điểm.</li>
+                    </ul>
+                </li>
+            </ul>
+        </section>
+
+        <section id="ai-chatbot-card" class="card">
+            <h3>🤖 Trợ lý AI</h3>
+            <p>Bạn có thắc mắc gì về Thấu kính hội tụ và Thấu kính phân kì không?</p>
+            <div id="chat-window" class="chat-window">
+                <div class="chat-message ai-message">Chào bạn! Tôi có thể giúp gì về bài học này?</div>
+            </div>
+            <div class="chat-input-area">
+                <input type="text" id="user-input" placeholder="Ví dụ: Ảnh ảo là gì?">
+                <button id="send-button">Gửi</button>
+            </div>
+        </section>
+
+        <section id="phan4" class="card">
+            <h2>Phần IV: Luyện tập</h2>
+            <div id="practice-quiz">
+                <h4>Câu hỏi trắc nghiệm</h4>
+                <div class="quiz-item">
+                    <p><strong>Câu 1:</strong> Đặt một vật trước thấu kính phân kì, ta sẽ thu được ảnh có đặc điểm gì?</p>
+                    <div class="feedback" id="feedback-q1"></div>
+                    <div><label><input type="radio" name="q1" value="a"> Ảnh thật, ngược chiều.</label></div>
+                    <div><label><input type="radio" name="q1" value="b" data-correct="true"> Ảnh ảo, cùng chiều, nhỏ hơn vật.</label></div>
+                    <div><label><input type="radio" name="q1" value="c"> Ảnh ảo, cùng chiều, lớn hơn vật.</label></div>
+                </div>
+                <hr>
+                <h4>Bài tập Kéo - Thả</h4>
+                <p>Hãy kéo các đặc điểm tương ứng vào mỗi trường hợp sau:</p>
+                <div class="dnd-container">
+                    <div class="dnd-source">
+                        <h5>Các đặc điểm</h5>
+                        <div class="draggable" draggable="true" data-prop="virtual">Ảnh ảo</div>
+                        <div class="draggable" draggable="true" data-prop="real">Ảnh thật</div>
+                        <div class="draggable" draggable="true" data-prop="smaller">Nhỏ hơn vật</div>
+                        <div class="draggable" draggable="true" data-prop="larger">Lớn hơn vật</div>
+                        <div class="draggable" draggable="true" data-prop="upright">Cùng chiều</div>
+                    </div>
+                    <div class="dnd-target">
+                        <h5>Ảnh qua TKPK</h5>
+                        <div class="drop-zone" data-case="tkpk"></div>
+                        <button onclick="checkDnd('tkpk')">Kiểm tra</button>
+                        <div class="feedback" id="feedback-tkpk"></div>
+                    </div>
+                     <div class="dnd-target">
+                        <h5>Ảnh qua TKHT (d < f)</h5>
+                        <div class="drop-zone" data-case="tkht"></div>
+                        <button onclick="checkDnd('tkht')">Kiểm tra</button>
+                        <div class="feedback" id="feedback-tkht"></div>
+                    </div>
+                </div>
+            </div>
+        </section>
+    </div>
+
+    <footer class="site-footer">
+        <div class="container">
+            <div class="footer-grid">
+                <div><h4>Nguồn tham khảo</h4><ul><li>Sách giáo khoa KHTN 9 - Bộ sách Kết nối tri thức.</li><li>PhET Interactive Simulations.</li></ul></div>
+                <div><h4>Về trang web</h4><ul><li><a href="/">Về trang danh sách học liệu</a></li></ul></div>
+                <div><h4>Bản quyền & Liên hệ</h4><p>&copy; <span id="copyright-year"></span> - Tên tác giả/Trường học</p><p>Góp ý xin gửi về: <a href="mailto:gopy@example.com">gopy@example.com</a></p></div>
+            </div>
+        </div>
+    </footer>
+    <a href="#page-top" id="back-to-top-btn" title="Lên đầu trang">⬆️</a>
+
+    <script>
+    document.addEventListener('DOMContentLoaded', function() {
+        // --- PHẦN II: MÔ PHỎNG THẤU KÍNH HỘI TỤ (SVG) ---
+        const svgNS = "http://www.w3.org/2000/svg";
+        const svg = document.getElementById('lens-svg');
+        const slider = document.getElementById('object-slider');
+        const description = document.getElementById('image-description');
+
+        const W = 800, H = 300;
+        const O_x = W / 2, O_y = H / 2; // Quang tâm O
+        const f = 100; // Tiêu cự (pixels)
+
+        function drawStaticElements() {
+            // Trục chính
+            const axis = document.createElementNS(svgNS, 'line');
+            axis.setAttribute('x1', 0); axis.setAttribute('y1', O_y);
+            axis.setAttribute('x2', W); axis.setAttribute('y2', O_y);
+            axis.setAttribute('stroke', '#aaa'); axis.setAttribute('stroke-dasharray', '5,5');
+            svg.appendChild(axis);
+
+            // Thấu kính hội tụ
+            const lens = document.createElementNS(svgNS, 'path');
+            lens.setAttribute('d', `M ${O_x} 20 C ${O_x+40} ${O_y}, ${O_x+40} ${O_y}, ${O_x} ${H-20} C ${O_x-40} ${O_y}, ${O_x-40} ${O_y}, ${O_x} 20`);
+            lens.setAttribute('fill', 'rgba(173, 216, 230, 0.5)'); lens.setAttribute('stroke', '#555');
+            svg.appendChild(lens);
+
+            // Tiêu điểm F, F', 2F, 2F'
+            [-2*f, -f, f, 2*f].forEach(pos => {
+                const tick = document.createElementNS(svgNS, 'line');
+                tick.setAttribute('x1', O_x + pos); tick.setAttribute('y1', O_y-5);
+                tick.setAttribute('x2', O_x + pos); tick.setAttribute('y2', O_y+5);
+                tick.setAttribute('stroke', '#555');
+                svg.appendChild(tick);
+                const text = document.createElementNS(svgNS, 'text');
+                text.setAttribute('x', O_x + pos - 5); text.setAttribute('y', O_y + 20);
+                text.textContent = pos === -2*f ? "2F" : pos === -f ? "F" : pos === f ? "F'" : "2F'";
+                svg.appendChild(text);
+            });
+        }
+        
+        // Tạo các vật thể động (vật, ảnh, tia)
+        const objectArrow = document.createElementNS(svgNS, 'line');
+        objectArrow.setAttribute('stroke', 'red'); objectArrow.setAttribute('stroke-width', '3');
+        objectArrow.id = 'objectArrow';
+        svg.appendChild(objectArrow);
+        // ... (Các tia sáng và ảnh cũng sẽ được tạo tương tự) ...
+
+        function updateLensSimulation() {
+            const d_obj = O_x - slider.value; // Khoảng cách từ vật đến O
+            
+            // Cập nhật vị trí vật
+            objectArrow.setAttribute('x1', slider.value); objectArrow.setAttribute('y1', O_y - 50);
+            objectArrow.setAttribute('x2', slider.value); objectArrow.setAttribute('y2', O_y);
+
+            // Dọn dẹp ảnh và tia cũ
+            document.querySelectorAll('.dynamic-ray, #imageArrow').forEach(el => el.remove());
+
+            let d_img, h_img_ratio;
+            let isReal = true;
+
+            if (d_obj === f) { // Vật tại F
+                 description.textContent = "Vật tại F: Ảnh ở vô cực";
+                 return;
+            } else if (d_obj > f) { // Ảnh thật
+                d_img = (d_obj * f) / (d_obj - f);
+            } else { // Ảnh ảo
+                isReal = false;
+                d_img = (d_obj * f) / (d_obj - f); // d_img sẽ âm
+            }
+            h_img_ratio = -d_img / d_obj;
+
+            const x_img = O_x + d_img;
+            const y_img = O_y - (50 * h_img_ratio);
+
+            // Vẽ ảnh
+            const imageArrow = document.createElementNS(svgNS, 'line');
+            imageArrow.id = 'imageArrow';
+            imageArrow.setAttribute('x1', x_img); imageArrow.setAttribute('y1', O_y);
+            imageArrow.setAttribute('x2', x_img); imageArrow.setAttribute('y2', y_img);
+            imageArrow.setAttribute('stroke', isReal ? 'blue' : 'lightblue');
+            imageArrow.setAttribute('stroke-width', '3');
+            if (!isReal) imageArrow.setAttribute('stroke-dasharray', '5,5');
+            svg.appendChild(imageArrow);
+
+            // Cập nhật mô tả
+            if (d_obj > 2*f) description.textContent = "d > 2f: Ảnh thật, ngược chiều, nhỏ hơn vật";
+            else if (d_obj > f) description.textContent = "f < d < 2f: Ảnh thật, ngược chiều, lớn hơn vật";
+            else description.textContent = "d < f: Ảnh ảo, cùng chiều, lớn hơn vật";
+        }
+        
+        drawStaticElements();
+        updateLensSimulation();
+        slider.addEventListener('input', updateLensSimulation);
+
+        // --- PHẦN IV: LUYỆN TẬP ---
+        const radioQuizzes = document.querySelectorAll('#practice-quiz input[type="radio"]');
+        radioQuizzes.forEach(radio => {
+            radio.addEventListener('change', function() {
+                const name = this.name;
+                const feedbackEl = document.getElementById('feedback-' + name);
+                if (this.dataset.correct) {
+                    feedbackEl.textContent = "Chính xác!"; feedbackEl.className = 'feedback correct';
+                } else {
+                    feedbackEl.textContent = "Chưa đúng."; feedbackEl.className = 'feedback incorrect';
+                }
+            });
+        });
+        
+        // Drag and Drop Logic
+        document.querySelectorAll('.draggable').forEach(item => {
+            item.addEventListener('dragstart', e => { e.dataTransfer.setData('text/plain', e.target.dataset.prop); });
+        });
+        document.querySelectorAll('.drop-zone').forEach(zone => {
+            zone.addEventListener('dragover', e => e.preventDefault());
+            zone.addEventListener('drop', e => {
+                e.preventDefault();
+                const prop = e.dataTransfer.getData('text/plain');
+                const tag = document.createElement('span');
+                tag.className = 'draggable';
+                tag.textContent = document.querySelector(`.draggable[data-prop="${prop}"]`).textContent;
+                e.target.appendChild(tag);
+            });
+        });
+        
+        window.checkDnd = function(caseName) {
+            const zone = document.querySelector(`.drop-zone[data-case="${caseName}"]`);
+            const feedbackEl = document.getElementById('feedback-' + caseName);
+            const answers = Array.from(zone.children).map(child => child.textContent);
+            let isCorrect = false;
+            if (caseName === 'tkpk' && answers.includes('Ảnh ảo') && answers.includes('Cùng chiều') && answers.includes('Nhỏ hơn vật')) {
+                isCorrect = true;
+            } else if (caseName === 'tkht' && answers.includes('Ảnh ảo') && answers.includes('Cùng chiều') && answers.includes('Lớn hơn vật')) {
+                isCorrect = true;
+            }
+            
+            if(isCorrect) {
+                feedbackEl.textContent = 'Đúng rồi!'; feedbackEl.className = 'feedback correct';
+            } else {
+                feedbackEl.textContent = 'Chưa chính xác!'; feedbackEl.className = 'feedback incorrect';
+            }
+        };
+
+        // --- FOOTER & BACK-TO-TOP ---
+        const backToTopBtn = document.getElementById("back-to-top-btn");
+        window.onscroll = function() {
+            if (document.body.scrollTop > 100 || document.documentElement.scrollTop > 100) {
+                backToTopBtn.style.display = "block";
+            } else {
+                backToTopBtn.style.display = "none";
+            }
+        };
+        document.getElementById('copyright-year').textContent = new Date().getFullYear();
+    });
+    </script>
+</body>
+</html>
